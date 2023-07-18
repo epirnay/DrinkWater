@@ -17,7 +17,6 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,7 +24,6 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelUuid;
@@ -36,7 +34,6 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -45,8 +42,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -302,7 +301,24 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             UUID uuid = characteristic.getUuid();
-            Log.i("BluetoothGattCallback", "Characteristic " + uuid.toString() + " changed | value: " + new String(characteristic.getValue(), StandardCharsets.UTF_8));
+            String incomingMessage = new String(characteristic.getValue(), StandardCharsets.UTF_8);
+            Log.i("BluetoothGattCallback", "Characteristic " + uuid.toString() + " changed | value: " + incomingMessage);
+
+            // SERVER REQUESTED DATE TIME
+            if(incomingMessage.equals("-")){
+                SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+                Date date = new Date();
+                String timeDate = format.format(date);
+
+
+                byte[] value = timeDate.getBytes();
+                characteristic.setValue(value);
+                gatt.writeCharacteristic(characteristic);
+            }
+            // DATE TIME AND VALUE CAME
+            else{
+                
+            }
         }
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
