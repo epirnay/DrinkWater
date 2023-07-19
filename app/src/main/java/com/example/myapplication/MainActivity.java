@@ -52,6 +52,7 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
+
     public final static String ACTION_GATT_CONNECTED =
             "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
 
@@ -83,10 +84,12 @@ public class MainActivity extends AppCompatActivity {
     UUID suuid;
     UUID cuuid;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         // getting adapters
         BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -305,6 +308,7 @@ public class MainActivity extends AppCompatActivity {
             Log.i("BluetoothGattCallback", "Characteristic " + uuid.toString() + " changed | value: " + incomingMessage);
 
             // SERVER REQUESTED DATE TIME
+            incomingMessage = "20230718140923";
             if(incomingMessage.equals("-")){
                 SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
                 Date date = new Date();
@@ -315,9 +319,12 @@ public class MainActivity extends AppCompatActivity {
                 characteristic.setValue(value);
                 gatt.writeCharacteristic(characteristic);
             }
-            // DATE TIME AND VALUE CAME
+            // TODO DATE TIME AND VALUE CAME
             else{
-                
+                String subDate = incomingMessage.substring(0,14);
+                int ml = Integer.parseInt(incomingMessage.substring(14));
+                MyDatabaseHelper myDB = new MyDatabaseHelper( MainActivity.this);
+                myDB.addIntake(subDate,ml);
             }
         }
         @Override
@@ -477,10 +484,5 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-
-
-
-
 
 }

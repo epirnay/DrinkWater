@@ -8,21 +8,19 @@
 
     <!--Ui component for our bar chart-->
 
-    <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/idBarChart"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
+    <TextView
+        android:id="@+id/textView16"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="79dp"
-        android:layout_marginTop="107dp"
-        android:layout_marginEnd="82dp"
-        android:layout_marginBottom="374dp" />
+        android:layout_marginEnd="135dp"
+        android:layout_marginBottom="351dp"
+        android:gravity="center"
+        android:text="Weekly Consumption" />
 
-    <com.jjoe64.graphview.GraphView
-        android:id="@+id/idGraphView"
+    <com.github.mikephil.charting.charts.BarChart
+        android:id="@+id/idBarChart"
         android:layout_width="250dp"
         android:layout_height="250dp"
         android:layout_alignParentStart="true"
@@ -34,18 +32,43 @@
         android:layout_marginEnd="73dp"
         android:layout_marginBottom="87dp" />
 
-    <Button
-        android:id="@+id/button_ToSetting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/idGraphView"
+
+    <com.jjoe64.graphview.GraphView
+        android:id="@+id/idGraphView"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
         android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="150dp"
-        android:layout_marginTop="268dp"
-        android:layout_marginEnd="160dp"
-        android:layout_marginBottom="23dp"
+        android:layout_marginStart="91dp"
+        android:layout_marginTop="90dp"
+        android:layout_marginEnd="69dp"
+        android:layout_marginBottom="390dp" />
+
+    <TextView
+        android:id="@+id/textView15"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="136dp"
+        android:layout_marginBottom="670dp"
+        android:gravity="center"
+        android:text="Daily Consumption" />
+
+    <Button
+        android:id="@+id/button_ToSetting"
+        android:layout_width="152dp"
+        android:layout_height="35dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="147dp"
+        android:layout_marginTop="668dp"
+        android:layout_marginEnd="112dp"
+        android:layout_marginBottom="28dp"
         android:text="Settings" />
 
 
