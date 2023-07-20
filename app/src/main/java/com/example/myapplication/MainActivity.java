@@ -21,6 +21,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,9 +34,11 @@ import android.os.ParcelUuid;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -43,14 +49,13 @@ import androidx.core.content.ContextCompat;
 
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener{
 
 
     public final static String ACTION_GATT_CONNECTED =
@@ -84,11 +89,42 @@ public class MainActivity extends AppCompatActivity {
     UUID suuid;
     UUID cuuid;
 
+    private SensorManager sensorManager;
+    private Sensor stepSensor;
+    private TextView stepsTaken;
+    private int stepCount;
+
+    private float totalSteps = 0f;
+    private float previousTotalSteps = 0f;
+    private boolean stepsInit = true;
+    private Handler handler = new Handler(Looper.getMainLooper());
+    private final Runnable saveRunnable = new Runnable() {
+        @Override
+        public void run() {
+            saveStepsWithTimestamp();
+            handler.postDelayed(this, 5 * 60 * 1000); // 5 minutes in milliseconds
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+
+        if(sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null){
+            stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        }
+        else{
+            stepsTaken.setText("no sensor");
+        }
+
+        stepsTaken = findViewById(R.id.stepsTaken);
 
 
         // getting adapters
@@ -163,6 +199,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+
+
+        if (stepSensor == null) {
+            Toast.makeText(this, "No sensor detected on this device", Toast.LENGTH_SHORT).show();
+        } else {
+            sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+        }
+
+
+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             LocationManager lm = (LocationManager)MainActivity.this.getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
             if(!lm.isLocationEnabled()){
@@ -174,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
             promptEnableBluetooth();
         }
 
-
+        handler.post(saveRunnable);
     }
 
 
@@ -308,18 +356,14 @@ public class MainActivity extends AppCompatActivity {
             Log.i("BluetoothGattCallback", "Characteristic " + uuid.toString() + " changed | value: " + incomingMessage);
 
             // SERVER REQUESTED DATE TIME
-            incomingMessage = "20230718140923";
             if(incomingMessage.equals("-")){
-                SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-                Date date = new Date();
-                String timeDate = format.format(date);
+                String timeDate = getFormattedDate();
 
 
                 byte[] value = timeDate.getBytes();
                 characteristic.setValue(value);
                 gatt.writeCharacteristic(characteristic);
             }
-            // TODO DATE TIME AND VALUE CAME
             else{
                 String subDate = incomingMessage.substring(0,14);
                 int ml = Integer.parseInt(incomingMessage.substring(14));
@@ -483,6 +527,43 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
         }
+    }
+
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        if(sensorEvent.sensor.equals(stepSensor)){
+            totalSteps = (int) sensorEvent.values[0];
+
+            int currentSteps = (int) (totalSteps - previousTotalSteps);
+            if(stepsInit){
+                previousTotalSteps = totalSteps;
+                stepsInit = false;
+                currentSteps = 0;
+            }
+            stepsTaken.setText(String.valueOf(currentSteps));
+
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
+    }
+    private void saveStepsWithTimestamp() {
+        String currentTimestamp = getFormattedDate();
+        int currentSteps = (int)totalSteps - (int)previousTotalSteps;
+
+        // TODO DATABASE IMPLEMENTATION
+
+        previousTotalSteps = totalSteps;
+
+    }
+    private String getFormattedDate(){
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+        Date date = new Date();
+        String timeDate = format.format(date);
+        return timeDate;
     }
 
 }
