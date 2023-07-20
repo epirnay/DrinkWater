@@ -19,6 +19,8 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ChartActivity extends AppCompatActivity {
 
@@ -32,6 +34,8 @@ public class ChartActivity extends AppCompatActivity {
 
     // array list for storing entries.
     ArrayList barEntries;
+
+
 
     // creating a string array for displaying days.
     String[] days = new String[]{"Sunday", "Monday", "Tuesday", "Thursday", "Friday", "Saturday"};
@@ -54,21 +58,31 @@ public class ChartActivity extends AppCompatActivity {
             }
         });
 
-        // on below line we are adding data to our graph view.
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
-                // on below line we are adding
-                // each point on our x and y axis.
-                new DataPoint(0, 1),
-                new DataPoint(1, 3),
-                new DataPoint(2, 4),
-                new DataPoint(3, 9),
-                new DataPoint(4, 6),
-                new DataPoint(5, 3),
-                new DataPoint(6, 6),
-                new DataPoint(7, 1),
-                new DataPoint(8, 2)
-        });
-        graphView.setTitle("My Graph View");
+        MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(this);
+
+        Map<String, Integer> dailyWaterConsumptionMap = myDatabaseHelper.getDailyWaterConsumption();
+
+        // Create an array of DataPoint to hold the data
+        DataPoint[] dataPoints = new DataPoint[dailyWaterConsumptionMap.size()];
+
+        int index = 0;
+        for (Map.Entry<String, Integer> entry : dailyWaterConsumptionMap.entrySet()) {
+            String date = entry.getKey();
+            int totalWaterConsumed = entry.getValue();
+            dataPoints[index] = new DataPoint(index, totalWaterConsumed);
+            index++;
+        }
+
+        // Create a LineGraphSeries using the DataPoint array
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(dataPoints);
+
+        // Set the title of the graph
+        graphView.setTitle("Daily Water Consumption");
+
+        // Add the LineGraphSeries to the GraphView
+        graphView.addSeries(series);
+
+
 
         // on below line we are setting
         // text color to our graph view.
@@ -194,4 +208,7 @@ public class ChartActivity extends AppCompatActivity {
         barEntries.add(new BarEntry(6f, 3));
         return barEntries;
     }
+
+
+
 }

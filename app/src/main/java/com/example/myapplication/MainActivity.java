@@ -41,6 +41,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -68,8 +69,6 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothLeScanner bleScanner;
 
     private int progress = 0;
-    Button buttonIncrement;
-    Button buttonDecrement;
     Button buttonToCharts;
     Button scanButton;
 
@@ -106,9 +105,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         // BUTTON INIT
-        buttonDecrement = (Button) findViewById(R.id.button_decr);
+
         buttonToCharts = (Button) findViewById(R.id.button_tocharts);
-        buttonIncrement = (Button) findViewById(R.id.button_incr);
+
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         textView = (TextView) findViewById(R.id.text_view_progress);
         scanButton = (Button) findViewById(R.id.scan_button);
@@ -132,40 +131,22 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        // when clicked on buttonIncrement progress is increased by 10%
-        buttonIncrement.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // if progress is less than or equal
-                // to 90% then only it can be increased
-                if (progress <= 90) {
-                    progress += 10;
-                    updateProgressBar();
-                }
-            }
-        });
-
-        // when clicked on buttonIncrement progress is decreased by 10%
-        buttonDecrement.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // If progress is greater than
-                // 10% then only it can be decreased
-                if (progress >= 10) {
-                    progress -= 10;
-                    updateProgressBar();
-                }
-            }
-        });
 
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        String incomingMessage = "20230718140923416";
+        String subDate = incomingMessage.substring(0, 14);
+        int ml = Integer.parseInt(incomingMessage.substring(14));
+        updateProgressBar((100*ml)/3000);
+        MyDatabaseHelper myDB = new MyDatabaseHelper(MainActivity.this);
+        myDB.addIntake(subDate, ml);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            LocationManager lm = (LocationManager)MainActivity.this.getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-            if(!lm.isLocationEnabled()){
+            LocationManager lm = (LocationManager) MainActivity.this.getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+            if (!lm.isLocationEnabled()) {
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 startActivity(intent);
             }
@@ -173,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
         if (!bluetoothAdapter.isEnabled()) {
             promptEnableBluetooth();
         }
-
 
     }
 
@@ -211,13 +191,7 @@ public class MainActivity extends AppCompatActivity {
             scanFilters.add(scanFilter);
 
             while (scanSettings == null);
-
-
             bleScanner.startScan(scanFilters, scanSettings, scanCallback);
-
-
-
-
 
         }
 
@@ -308,7 +282,6 @@ public class MainActivity extends AppCompatActivity {
             Log.i("BluetoothGattCallback", "Characteristic " + uuid.toString() + " changed | value: " + incomingMessage);
 
             // SERVER REQUESTED DATE TIME
-            incomingMessage = "20230718140923";
             if(incomingMessage.equals("-")){
                 SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
                 Date date = new Date();
@@ -413,9 +386,9 @@ public class MainActivity extends AppCompatActivity {
 
     // updateProgressBar() method sets
     // the progress of ProgressBar in text
-    private void updateProgressBar() {
+    private void updateProgressBar(int progress) {
         progressBar.setProgress(progress);
-        textView.setText(String.valueOf(progress));
+        textView.setText(String.valueOf(progress) + "%");
     }
 
     public static boolean hasPermission(Context context, String permissionType) {
@@ -431,6 +404,7 @@ public class MainActivity extends AppCompatActivity {
             return hasPermission(context, Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
+
 
 
 
@@ -483,6 +457,10 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
         }
+
+
     }
+
+
 
 }
