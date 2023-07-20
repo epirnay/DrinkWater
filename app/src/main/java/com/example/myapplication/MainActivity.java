@@ -106,9 +106,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         // BUTTON INIT
-        buttonDecrement = (Button) findViewById(R.id.button_decr);
         buttonToCharts = (Button) findViewById(R.id.button_tocharts);
-        buttonIncrement = (Button) findViewById(R.id.button_incr);
+
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         textView = (TextView) findViewById(R.id.text_view_progress);
         scanButton = (Button) findViewById(R.id.scan_button);
@@ -132,31 +131,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        // when clicked on buttonIncrement progress is increased by 10%
-        buttonIncrement.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // if progress is less than or equal
-                // to 90% then only it can be increased
-                if (progress <= 90) {
-                    progress += 10;
-                    updateProgressBar();
-                }
-            }
-        });
 
-        // when clicked on buttonIncrement progress is decreased by 10%
-        buttonDecrement.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // If progress is greater than
-                // 10% then only it can be decreased
-                if (progress >= 10) {
-                    progress -= 10;
-                    updateProgressBar();
-                }
-            }
-        });
 
     }
 
@@ -323,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
             else{
                 String subDate = incomingMessage.substring(0,14);
                 int ml = Integer.parseInt(incomingMessage.substring(14));
+                updateProgressBar(ml);
                 MyDatabaseHelper myDB = new MyDatabaseHelper( MainActivity.this);
                 myDB.addIntake(subDate,ml);
             }
@@ -413,9 +389,9 @@ public class MainActivity extends AppCompatActivity {
 
     // updateProgressBar() method sets
     // the progress of ProgressBar in text
-    private void updateProgressBar() {
+    private void updateProgressBar(int progress) {
         progressBar.setProgress(progress);
-        textView.setText(String.valueOf(progress));
+        textView.setText(String.valueOf(progress) + "%");
     }
 
     public static boolean hasPermission(Context context, String permissionType) {
