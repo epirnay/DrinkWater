@@ -51,7 +51,9 @@ public class StepsService extends Service implements SensorEventListener {
         }
         lastSaved = totalSteps;
         MyDatabaseHelper myDatabaseHelper = MyDatabaseHelper.getInstance(this);
-        myDatabaseHelper.addStep(dateTimeString, stepsToSave);
+        String datee = dateTimeString.substring(0,8);
+        String timee = dateTimeString.substring(8,14);
+        myDatabaseHelper.addStep(datee, timee, stepsToSave);
     }
 
 

@@ -30,6 +30,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
     public static final String COLUMN_ID = "id";
 
     public static final String COLUMN_DATE= "date";
+    public static final String COLUMN_DATE2= "date";
     public static final String COLUMN_TIME = "time";
     public static final String COLUMN_TIME2 = "time";
     public static final String COLUMN_INTAKE = "ml";
@@ -58,12 +59,14 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         String query = "CREATE TABLE " + TABLE_NAME +
                 " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_DATE + " TEXT, " +
+                COLUMN_TIME + " TEXT, " +
                 COLUMN_INTAKE + " INTEGER) ;";
         db.execSQL(query);
 
         String query2 = "CREATE TABLE " + TABLE_NAME2 +
                 " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_DATE + " TEXT, " +
+                COLUMN_DATE2 + " TEXT, " +
+                COLUMN_TIME2 + " TEXT, " +
                 COLUMN_STEP + " INTEGER) ;";
         db.execSQL(query2);
 
