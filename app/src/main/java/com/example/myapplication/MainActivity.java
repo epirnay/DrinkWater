@@ -103,12 +103,6 @@ public class MainActivity extends AppCompatActivity {
     UUID cuuid;
     MyDatabaseHelper myDatabaseHelper;
 
-    private TextView stepsTaken;
-    private int stepCount;
-
-    private float totalSteps = 0f;
-    private float previousTotalSteps = 0f;
-    private boolean stepsInit = true;
     private Handler handler = new Handler(Looper.getMainLooper());
 
     private final Runnable notificationRunnable = new Runnable() {
@@ -130,8 +124,6 @@ public class MainActivity extends AppCompatActivity {
         myDatabaseHelper = MyDatabaseHelper.getInstance(this);
         //myDB.addIntake("20230718161024",250);
         //myDB.addStep("20230718161024",5);
-        stepsTaken = findViewById(R.id.stepsTaken);
-
         // getting adapters
         BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         bluetoothAdapter = bluetoothManager.getAdapter();
@@ -227,7 +219,12 @@ public class MainActivity extends AppCompatActivity {
         if (!bluetoothAdapter.isEnabled()) {
             promptEnableBluetooth();
         }
-
+        for (int i = 10; i < 21; i++) {
+            for (int j = 0; j < 24; j++) {
+                myDatabaseHelper.addIntake("202307" + String.valueOf(i) , String.valueOf(j) + "1024", 150);
+                myDatabaseHelper.addStep("202307" + String.valueOf(i) , String.valueOf(j) + "1024", 250);
+            }
+        }
     }
 
 
