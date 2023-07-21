@@ -109,8 +109,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             checkWaterConsumption();
-
-            handler.postDelayed(this, 30 * 60 * 1000); // 30 minutes in milliseconds
+            int mins = myDatabaseHelper.getLastDataFromColumn("settingsDB", "remind_mins");
+            handler.postDelayed(this, mins * 60 * 1000); // Remind minutes the user entered.
         }
     };
 
@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
             totalWaterConsumed+= entry.getValue();
 
         }
-        if(totalWaterConsumed>1500){
+        if(totalWaterConsumed>2000){
             Toast.makeText(this, "YOU SHOULD DRINK WATER", Toast.LENGTH_SHORT).show();
             progress=totalWaterConsumed;
             addNotification();
@@ -168,7 +168,12 @@ public class MainActivity extends AppCompatActivity {
 
         int leftWater = 2000-progress;
         TextView TextView2 = findViewById(R.id.textView2);
-        TextView2.setText("Drink " + leftWater +  " ml more and you are almost there!");
+        if (leftWater <=0) {
+            TextView2.setText("You have reached your goal!");
+        }
+        else{
+            TextView2.setText("Drink " + leftWater +  " ml more and you are almost there!");
+        }
 
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
