@@ -66,7 +66,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener{
+public class MainActivity extends AppCompatActivity {
 
 
     public final static String ACTION_GATT_CONNECTED =
@@ -100,8 +100,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     UUID suuid;
     UUID cuuid;
     MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(this);
-    private SensorManager sensorManager;
-    private Sensor stepSensor;
+
     private TextView stepsTaken;
     private int stepCount;
 
@@ -109,14 +108,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float previousTotalSteps = 0f;
     private boolean stepsInit = true;
     private Handler handler = new Handler(Looper.getMainLooper());
-    private final Runnable saveRunnable = new Runnable() {
-        @Override
-        public void run() {
-            saveStepsWithTimestamp();
 
-            handler.postDelayed(this, 5 * 60 * 1000); // 5 minutes in milliseconds
-        }
-    };
     private final Runnable notificationRunnable = new Runnable() {
         @Override
         public void run() {
@@ -132,19 +124,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         handler.post(notificationRunnable);
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         MyDatabaseHelper myDB = new MyDatabaseHelper( MainActivity.this);
         //myDB.addIntake("20230718161024",250);
         //myDB.addStep("20230718161024",5);
         stepsTaken = findViewById(R.id.stepsTaken);
-        if(sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null){
-            stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        }
-        else{
-            stepsTaken.setText("no sensor");
-        }
 
 
 
@@ -216,13 +200,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onResume() {
         super.onResume();
-
-
-        if (stepSensor == null) {
-            Toast.makeText(this, "No sensor detected on this device", Toast.LENGTH_SHORT).show();
-        } else {
-            sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_NORMAL);
-
+        Intent serviceIntent = new Intent(this, StepsService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
         }
 
 
@@ -239,7 +219,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             promptEnableBluetooth();
         }
 
-        handler.post(saveRunnable);
     }
 
 
@@ -570,8 +549,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     // updateProgressBar() method sets
     // the progress of ProgressBar in text
     private void updateProgressBar() {
-        progressBar.setProgress(progress);
-        textView.setText(String.valueOf(progress));
+        // Calculate the percentage of progress
+        int percentage = (progress * 100) / 2000;
+
+        // If progress exceeds the target, set percentage to 100
+        if (percentage > 100) {
+            percentage = 100;
+        }
+        // Update the ProgressBar with the calculated percentage
+        progressBar.setProgress(percentage);
+
+        // Update the TextView to display the percentage
+        textView.setText(percentage + "%");
     }
 
     public static boolean hasPermission(Context context, String permissionType) {
@@ -642,38 +631,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
 
-    @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        if(sensorEvent.sensor.equals(stepSensor)){
-            totalSteps = (int) sensorEvent.values[0];
-
-            int currentSteps = (int) (totalSteps - previousTotalSteps);
-            if(stepsInit){
-                previousTotalSteps = totalSteps;
-                stepsInit = false;
-                currentSteps = 0;
-            }
-            stepsTaken.setText(String.valueOf(currentSteps));
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                myDatabaseHelper.addStep(LocalDateTime.now().toString(),currentSteps);
-            }
-
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
-
-    }
-    private void saveStepsWithTimestamp() {
-        String currentTimestamp = getFormattedDate();
-        int currentSteps = (int)totalSteps - (int)previousTotalSteps;
-
-        // TODO DATABASE IMPLEMENTATION
-
-        previousTotalSteps = totalSteps;
-
-    }
     private void checkWaterConsumption() {
         Map<String, Integer> dailyWaterConsumptionMap = myDatabaseHelper.getDailyWaterConsumption();
         int totalWaterConsumed=0;

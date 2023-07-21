@@ -91,7 +91,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.
 
-                rawQuery("SELECT date, SUM(ml) as total_water FROM water_intake GROUP BY date", null);
+        rawQuery("SELECT date as date, SUM(ml) as total_water FROM water_intake GROUP BY date", null);
 
         if (cursor != null && cursor.moveToFirst()) {
             do {

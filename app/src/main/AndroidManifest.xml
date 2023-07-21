@@ -19,6 +19,8 @@
         android:usesPermissionFlags="neverForLocation"
         tools:targetApi="s" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
@@ -35,6 +37,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
+        <service android:name=".StepsService" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
