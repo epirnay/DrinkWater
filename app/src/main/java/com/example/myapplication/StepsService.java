@@ -32,7 +32,7 @@ public class StepsService extends Service implements SensorEventListener {
     private boolean stepsInit = true;
     private float lastSaved = 0f;
     private Handler handler = new Handler(Looper.getMainLooper());
-
+    private boolean firstSave = true;
     private final Runnable saveSteps = new Runnable() {
         @Override
         public void run() {
@@ -45,6 +45,10 @@ public class StepsService extends Service implements SensorEventListener {
     private void saveSteps() {
         String dateTimeString = getFormattedDate();
         int stepsToSave = (int) (totalSteps - lastSaved);
+        if(firstSave){
+            stepsToSave = 0;
+            firstSave = false;
+        }
         lastSaved = totalSteps;
         MyDatabaseHelper myDatabaseHelper = MyDatabaseHelper.getInstance(this);
         myDatabaseHelper.addStep(dateTimeString, stepsToSave);
