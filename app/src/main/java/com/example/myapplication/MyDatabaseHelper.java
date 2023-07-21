@@ -164,4 +164,27 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         }
         return dailyStepMap;
     }
+
+    public Cursor getData(int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res =  db.rawQuery( "select * from contacts where id="+id+"", null );
+        return res;
+    }
+
+    @SuppressLint("Range")
+    public int getLastDataFromColumn(String tableName, String columnName) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int result = 0; // Default value, you may set an appropriate default value based on your requirements
+
+        String query = "SELECT " + columnName + " FROM " + tableName + " ORDER BY id DESC LIMIT 1";
+
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            result = cursor.getInt(cursor.getColumnIndex(columnName));
+            cursor.close();
+        }
+
+        return result;
+    }
+
 }
