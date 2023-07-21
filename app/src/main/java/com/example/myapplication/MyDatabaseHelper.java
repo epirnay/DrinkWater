@@ -9,26 +9,29 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.text.Spannable;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import androidx.annotation.Nullable;
 
 import org.w3c.dom.Text;
 
-public class MyDatabaseHelper extends SQLiteOpenHelper {
+import java.util.HashMap;
+import java.util.Map;
+
+public class MyDatabaseHelper extends SQLiteOpenHelper{
 
     private Context context;
     public static final String DATABASE_NAME = "WaterApp.db";
     public static final int DATABASE_VERSION = 1;
 
-    public static final String TABLE_NAME = "water_intake";
+    public static final String TABLE_NAME= "water_intake";
+
+    public static final String TABLE_NAME2= "stepCountDB";
     public static final String COLUMN_ID = "id";
 
-    public static final String COLUMN_DATE = "date";
+    public static final String COLUMN_DATE= "date";
     public static final String COLUMN_INTAKE = "ml";
+
+
+    public static final String COLUMN_STEP= "step_count";
 
 
     public MyDatabaseHelper(@Nullable Context context) {
@@ -43,34 +46,52 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_DATE + " TEXT, " +
                 COLUMN_INTAKE + " INTEGER) ;";
         db.execSQL(query);
+
+        String query2 = "CREATE TABLE " + TABLE_NAME2 +
+                " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_DATE + " TEXT, " +
+                COLUMN_STEP + " INTEGER) ;";
+        db.execSQL(query2);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
         db.execSQL(" DROP TABLE IF EXISTS " + TABLE_NAME);
+        db.execSQL(" DROP TABLE IF EXISTS " + TABLE_NAME2);
         onCreate(db);
     }
 
-    void addIntake(String date, int ml) {
+    void addIntake(String date, int ml ) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
 
         cv.put(COLUMN_DATE, date);
         cv.put(COLUMN_INTAKE, ml);
         long result = db.insert(TABLE_NAME, null, cv);
-        if (result == -1) {
+        if (result == -1){
             Toast.makeText(context, "failed", Toast.LENGTH_SHORT).show();
 
-        } else {
+        }else {
             Toast.makeText(context, "Added Successfully!", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    void addStep (String date, int step_count){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+
+        cv.put(COLUMN_DATE, date);
+        cv.put(COLUMN_STEP, step_count);
+        long result = db.insert(TABLE_NAME2, null, cv);
     }
 
     public Map<String, Integer> getDailyWaterConsumption() {
 
         Map<String, Integer> dailyWaterConsumptionMap = new HashMap<>();
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT date, SUM(ml) as total_water FROM daily_water_consumption_table GROUP BY date", null);
+        Cursor cursor = db.
+
+                rawQuery("SELECT date, SUM(ml) as total_water FROM water_intake GROUP BY date", null);
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
@@ -85,8 +106,25 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
         }
         return dailyWaterConsumptionMap;
     }
+    public Map<String, Integer> getStepCount() {
 
+        Map<String, Integer> dailyStepMap = new HashMap<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.
 
+                rawQuery("SELECT date, step_count as total_step FROM stepCountDB GROUP BY date", null);
 
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") String date = cursor.getString(cursor.getColumnIndex("date"));
+                @SuppressLint("Range") int totalStep = cursor.getInt(cursor.getColumnIndex("total_step"));
 
+                // Add the date and total water consumption to the map.
+                dailyStepMap.put(date, totalStep);
+            } while (cursor.moveToNext());
+
+            cursor.close();
+        }
+        return dailyStepMap;
+    }
 }

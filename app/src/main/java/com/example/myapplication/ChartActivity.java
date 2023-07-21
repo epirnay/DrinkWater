@@ -19,8 +19,8 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class ChartActivity extends AppCompatActivity {
 
@@ -34,8 +34,6 @@ public class ChartActivity extends AppCompatActivity {
 
     // array list for storing entries.
     ArrayList barEntries;
-
-
 
     // creating a string array for displaying days.
     String[] days = new String[]{"Sunday", "Monday", "Tuesday", "Thursday", "Friday", "Saturday"};
@@ -66,10 +64,17 @@ public class ChartActivity extends AppCompatActivity {
         DataPoint[] dataPoints = new DataPoint[dailyWaterConsumptionMap.size()];
 
         int index = 0;
-        for (Map.Entry<String, Integer> entry : dailyWaterConsumptionMap.entrySet()) {
+        Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
+        for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
             String date = entry.getKey();
+            date=date.substring(8,10);
+
+            int dateInt=Integer.parseInt(date);
+            //if(dateInt==15){
+               // dateInt=13;
+            //}
             int totalWaterConsumed = entry.getValue();
-            dataPoints[index] = new DataPoint(index, totalWaterConsumed);
+            dataPoints[index] = new DataPoint(dateInt, totalWaterConsumed);
             index++;
         }
 
@@ -81,8 +86,6 @@ public class ChartActivity extends AppCompatActivity {
 
         // Add the LineGraphSeries to the GraphView
         graphView.addSeries(series);
-
-
 
         // on below line we are setting
         // text color to our graph view.
@@ -208,7 +211,4 @@ public class ChartActivity extends AppCompatActivity {
         barEntries.add(new BarEntry(6f, 3));
         return barEntries;
     }
-
-
-
 }
