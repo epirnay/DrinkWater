@@ -72,7 +72,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="64dp"
         android:layout_marginTop="60dp"
-        android:text="Drink 900 ml more and you are almost there!"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button_tocharts" />
 
@@ -82,7 +81,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="64dp"
         android:layout_marginTop="15dp"
-        android:text="You hit the goal of drinking 3000 ml water"
+        android:text="You hit the goal of drinking 2000 ml water"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
 

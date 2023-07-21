@@ -41,6 +41,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -91,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
     ProgressBar progressBar;
     TextView textView;
+
     ScanSettings scanSettings;
     ScanFilter scanFilter;
 
@@ -114,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             checkWaterConsumption();
 
-            handler.postDelayed(this, 30 * 60 * 1000); // 5 minutes in milliseconds
+            handler.postDelayed(this, 30 * 60 * 1000); // 30 minutes in milliseconds
         }
     };
 
@@ -129,9 +131,6 @@ public class MainActivity extends AppCompatActivity {
         //myDB.addIntake("20230718161024",250);
         //myDB.addStep("20230718161024",5);
         stepsTaken = findViewById(R.id.stepsTaken);
-
-
-
 
         // getting adapters
         BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -168,12 +167,17 @@ public class MainActivity extends AppCompatActivity {
 
         }
         if(totalWaterConsumed>1500){
-            Toast.makeText(this, "yeterince su içtin", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "YOU SHOULD DRINK WATER", Toast.LENGTH_SHORT).show();
             progress=totalWaterConsumed;
             addNotification();
             //showNotification(this,"abc","abc");
         }
         updateProgressBar();
+
+        int leftWater = 2000-progress;
+        TextView TextView2 = findViewById(R.id.textView2);
+        TextView2.setText("Drink " + leftWater +  " ml more and you are almost there!");
+
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -361,13 +365,15 @@ public class MainActivity extends AppCompatActivity {
                 gatt.writeCharacteristic(characteristic);
             }
             else{
-                String subDate = incomingMessage.substring(0,14);
+                String date = incomingMessage.substring(0,8);
+                String time = incomingMessage.substring(8,14);
                 int ml = Integer.parseInt(incomingMessage.substring(14));
                 MyDatabaseHelper myDB = new MyDatabaseHelper( MainActivity.this);
-                myDB.addIntake(subDate,ml);
+                myDB.addIntake(date, time, ml);
                 progress=progress+ml;
                 updateProgressBar();
             }
+
         }
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
@@ -463,7 +469,7 @@ public class MainActivity extends AppCompatActivity {
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.circle) //set icon for notification
                         .setContentTitle("DrinkWater") //set title of notification
-                        .setContentText("Su içme kotanızı doldurdunuz")//this is notification message
+                        .setContentText("YOU SHOULD DRINK WATER")//this is notification message
                         .setAutoCancel(true) // makes auto cancel of notification
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT).setChannelId(id); //set priority of notification
 
@@ -641,7 +647,7 @@ public class MainActivity extends AppCompatActivity {
             totalWaterConsumed+= entry.getValue();
 
         }
-        if(totalWaterConsumed>1500){
+        if(totalWaterConsumed>=2000){
             Toast.makeText(this, "yeterince su içtin", Toast.LENGTH_SHORT).show();
             progress=totalWaterConsumed;
             addNotification();

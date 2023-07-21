@@ -12,6 +12,8 @@ public class SettingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.setting);
 
+        MyDatabaseHelper myDB = new MyDatabaseHelper( SettingActivity.this);
+
         EditText editText = findViewById(R.id.editText);
         editText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(5) }); // Optional: Set maximum character length
         editText.setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -27,5 +29,9 @@ public class SettingActivity extends AppCompatActivity {
         EditText editText6 = findViewById(R.id.editText6);
         editText6.setFilters(new InputFilter[] { new InputFilter.LengthFilter(5) }); // Optional: Set maximum character length
         editText6.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+        //myDB.SettingValues(Integer.parseInt(String.valueOf(editText)),Integer.parseInt(String.valueOf(editText2)),Integer.parseInt(String.valueOf(editText3)),Integer.parseInt(String.valueOf(editText6)));
+
+
     }
 }
