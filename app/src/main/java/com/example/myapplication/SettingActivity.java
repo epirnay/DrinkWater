@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class SettingActivity extends AppCompatActivity {
 
-    private EditText editTextName, editTextAge;
     private Button buttonSave;
     @Override
     protected void onCreate(Bundle savedInstanceState) {

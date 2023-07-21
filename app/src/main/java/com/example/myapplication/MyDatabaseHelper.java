@@ -31,6 +31,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
 
     public static final String COLUMN_DATE= "date";
     public static final String COLUMN_TIME = "time";
+    public static final String COLUMN_TIME2 = "time";
     public static final String COLUMN_INTAKE = "ml";
 
     public static final String COLUMN_STEP= "step_count";
@@ -101,11 +102,12 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         }
     }
 
-    void addStep (String date, int step_count){
+    void addStep (String date, String time, int step_count){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
 
         cv.put(COLUMN_DATE, date);
+        cv.put(COLUMN_TIME2, time);
         cv.put(COLUMN_STEP, step_count);
         long result = db.insert(TABLE_NAME2, null, cv);
     }
@@ -165,11 +167,6 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         return dailyStepMap;
     }
 
-    public Cursor getData(int id) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res =  db.rawQuery( "select * from contacts where id="+id+"", null );
-        return res;
-    }
 
     @SuppressLint("Range")
     public int getLastDataFromColumn(String tableName, String columnName) {
