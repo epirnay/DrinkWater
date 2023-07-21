@@ -12,7 +12,7 @@ public class SettingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.setting);
 
-        MyDatabaseHelper myDB = new MyDatabaseHelper( SettingActivity.this);
+        MyDatabaseHelper myDB = MyDatabaseHelper.getInstance(this);
 
         EditText editText = findViewById(R.id.editText);
         editText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(5) }); // Optional: Set maximum character length

@@ -5,36 +5,57 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class StepsService extends Service implements SensorEventListener {
     private SensorManager sensorManager;
     private Sensor stepSensor;
     public static final String CHANNEL_ID = "StepsServiceChannel";
     public static final int NOTIF_ID = 101;
-    public static final int SET_COUNT = 1;
-    public static final int STOP_FOREGROUND = 2;
-    public static final int MSG_REGISTER_CLIENT = 3;
     private float totalSteps = 0f;
     private float previousTotalSteps = 0f;
     private boolean stepsInit = true;
+    private float lastSaved = 0f;
+    private Handler handler = new Handler(Looper.getMainLooper());
 
+    private final Runnable saveSteps = new Runnable() {
+        @Override
+        public void run() {
+            saveSteps();
 
+            handler.postDelayed(this, 60 * 60 * 1000); // every 1 hour
+        }
+    };
+
+    private void saveSteps() {
+        String dateTimeString = getFormattedDate();
+        int stepsToSave = (int) (totalSteps - lastSaved);
+        lastSaved = totalSteps;
+        MyDatabaseHelper myDatabaseHelper = MyDatabaseHelper.getInstance(this);
+        myDatabaseHelper.addStep(dateTimeString, stepsToSave);
+    }
 
 
     @Override
     public void onCreate(){
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        handler.post(saveSteps);
 
     }
     @Nullable
@@ -116,5 +137,10 @@ public class StepsService extends Service implements SensorEventListener {
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         manager.notify(NOTIF_ID, notification);
     }
-
+    private String getFormattedDate(){
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+        Date date = new Date();
+        String timeDate = format.format(date);
+        return timeDate;
+    }
 }

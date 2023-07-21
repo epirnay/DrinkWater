@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
     UUID suuid;
     UUID cuuid;
-    MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(this);
+    MyDatabaseHelper myDatabaseHelper;
 
     private TextView stepsTaken;
     private int stepCount;
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         handler.post(notificationRunnable);
-        MyDatabaseHelper myDB = new MyDatabaseHelper( MainActivity.this);
+        myDatabaseHelper = MyDatabaseHelper.getInstance(this);
         //myDB.addIntake("20230718161024",250);
         //myDB.addStep("20230718161024",5);
         stepsTaken = findViewById(R.id.stepsTaken);
@@ -368,7 +368,7 @@ public class MainActivity extends AppCompatActivity {
                 String date = incomingMessage.substring(0,8);
                 String time = incomingMessage.substring(8,14);
                 int ml = Integer.parseInt(incomingMessage.substring(14));
-                MyDatabaseHelper myDB = new MyDatabaseHelper( MainActivity.this);
+                MyDatabaseHelper myDB = MyDatabaseHelper.getInstance(MainActivity.this);
                 myDB.addIntake(date, time, ml);
                 progress=progress+ml;
                 updateProgressBar();

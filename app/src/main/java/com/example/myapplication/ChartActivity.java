@@ -56,7 +56,7 @@ public class ChartActivity extends AppCompatActivity {
             }
         });
 
-        MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(this);
+        MyDatabaseHelper myDatabaseHelper = MyDatabaseHelper.getInstance(this);
 
         Map<String, Integer> dailyWaterConsumptionMap = myDatabaseHelper.getDailyWaterConsumption();
 

@@ -40,13 +40,18 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
 
     public static final String COLUMN_REMINDSTEP= "remind_step";
     public static final String COLUMN_REMINDMINS= "remind_mins";
+    private static MyDatabaseHelper instance = null;
 
-
-    public MyDatabaseHelper(@Nullable Context context) {
+    private MyDatabaseHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
     }
-
+    public static synchronized MyDatabaseHelper getInstance(Context context) {
+        if (instance == null) {
+            instance = new MyDatabaseHelper(context.getApplicationContext());
+        }
+        return instance;
+    }
     @Override
     public void onCreate(SQLiteDatabase db) {
         String query = "CREATE TABLE " + TABLE_NAME +
