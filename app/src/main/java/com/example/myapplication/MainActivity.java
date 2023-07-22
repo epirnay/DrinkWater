@@ -3,6 +3,7 @@ package com.example.myapplication;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -110,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             checkWaterConsumption();
             int mins = myDatabaseHelper.getLastDataFromColumn("settingsDB", "remind_mins");
-            handler.postDelayed(this, mins * 60 * 1000); // Remind minutes the user entered.
+            handler.postDelayed(this, 30 * 60 * 1000); // Remind minutes the user entered.
         }
     };
 
@@ -154,7 +155,6 @@ public class MainActivity extends AppCompatActivity {
         Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
         for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
             String date = entry.getKey();
-            date=date.substring(8,10);
             totalWaterConsumed+= entry.getValue();
 
         }
@@ -201,13 +201,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        Intent serviceIntent = new Intent(this, StepsService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
+        if (!isServiceRunning(StepsService.class)) {
+            Intent serviceIntent = new Intent(this, StepsService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent);
+            } else {
+                startService(serviceIntent);  // For older versions
+            }
         }
-
-
-
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             LocationManager lm = (LocationManager)MainActivity.this.getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
@@ -218,12 +219,6 @@ public class MainActivity extends AppCompatActivity {
         }
         if (!bluetoothAdapter.isEnabled()) {
             promptEnableBluetooth();
-        }
-        for (int i = 10; i < 21; i++) {
-            for (int j = 0; j < 24; j++) {
-                myDatabaseHelper.addIntake("202307" + String.valueOf(i) , String.valueOf(j) + "1024", 150);
-                myDatabaseHelper.addStep("202307" + String.valueOf(i) , String.valueOf(j) + "1024", 250);
-            }
         }
     }
 
@@ -644,8 +639,7 @@ public class MainActivity extends AppCompatActivity {
         int totalWaterConsumed=0;
         Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
         for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
-            String date = entry.getKey();
-            date=date.substring(8,10);
+
             totalWaterConsumed+= entry.getValue();
 
         }
@@ -658,11 +652,21 @@ public class MainActivity extends AppCompatActivity {
         updateProgressBar();
 
     }
-    private String getFormattedDate(){
+    public static String getFormattedDate(){
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
         Date date = new Date();
         String timeDate = format.format(date);
         return timeDate;
     }
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 }

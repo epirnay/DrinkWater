@@ -43,7 +43,7 @@ public class StepsService extends Service implements SensorEventListener {
     };
 
     private void saveSteps() {
-        String dateTimeString = getFormattedDate();
+        String dateTimeString = MainActivity.getFormattedDate();
         int stepsToSave = (int) (totalSteps - lastSaved);
         if(firstSave){
             stepsToSave = 0;
@@ -142,11 +142,5 @@ public class StepsService extends Service implements SensorEventListener {
 
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         manager.notify(NOTIF_ID, notification);
-    }
-    private String getFormattedDate(){
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
-        Date date = new Date();
-        String timeDate = format.format(date);
-        return timeDate;
     }
 }

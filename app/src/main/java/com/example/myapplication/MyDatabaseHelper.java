@@ -128,20 +128,21 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
     }
 
     public Map<String, Integer> getDailyWaterConsumption() {
-
+        String now = MainActivity.getFormattedDate();
+        String today = now.substring(0, 8);
         Map<String, Integer> dailyWaterConsumptionMap = new HashMap<>();
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.
+        String query = "SELECT substr(time, 1, 2) as time, SUM(ml) as total_water FROM water_intake WHERE date = ? GROUP BY substr(time, 1, 2)";
 
-        rawQuery("SELECT date as date, SUM(ml) as total_water FROM water_intake GROUP BY date", null);
+        Cursor cursor = db.rawQuery(query, new String[]{today});
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                @SuppressLint("Range") String date = cursor.getString(cursor.getColumnIndex("date"));
+                @SuppressLint("Range") String time = cursor.getString(cursor.getColumnIndex("time"));
                 @SuppressLint("Range") int totalWaterConsumed = cursor.getInt(cursor.getColumnIndex("total_water"));
 
                 // Add the date and total water consumption to the map.
-                dailyWaterConsumptionMap.put(date, totalWaterConsumed);
+                dailyWaterConsumptionMap.put(time, totalWaterConsumed);
             } while (cursor.moveToNext());
 
             cursor.close();

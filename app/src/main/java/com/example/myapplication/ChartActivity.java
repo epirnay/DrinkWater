@@ -3,6 +3,7 @@ package com.example.myapplication;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -66,10 +67,10 @@ public class ChartActivity extends AppCompatActivity {
         int index = 0;
         Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
         for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
-            String date = entry.getKey();
-            date=date.substring(8,10);
+            String time = entry.getKey();
+            time=time.substring(0,2);
 
-            int dateInt=Integer.parseInt(date);
+            int dateInt=Integer.parseInt(time);
             //if(dateInt==15){
                // dateInt=13;
             //}
@@ -80,6 +81,10 @@ public class ChartActivity extends AppCompatActivity {
 
         // Create a LineGraphSeries using the DataPoint array
         LineGraphSeries<DataPoint> series = new LineGraphSeries<>(dataPoints);
+        for (DataPoint point : dataPoints) {
+            Log.d("GraphData", "X: " + point.getX() + ", Y: " + point.getY());
+        }
+
 
         // Set the title of the graph
         graphView.setTitle("Daily Water Consumption");
@@ -93,11 +98,15 @@ public class ChartActivity extends AppCompatActivity {
 
         // on below line we are setting
         // our title text size.
-        graphView.setTitleTextSize(18);
+        graphView.setTitleTextSize(14);
 
         // on below line we are adding
         // data series to our graph view.
         graphView.addSeries(series);
+        graphView.getViewport().setXAxisBoundsManual(true);
+        graphView.getViewport().setMinX(0);  // starting hour
+        graphView.getViewport().setMaxX(24); // end hour
+
         barChart = findViewById(R.id.idBarChart);
 
         // creating a new bar data set.
