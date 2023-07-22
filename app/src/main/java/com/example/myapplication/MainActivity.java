@@ -61,8 +61,10 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -150,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
         //myDB.addStep("20230718161024",5);
         //myDatabaseHelper.addStep("1",5);
 
-
+        // TODO make dynamic
         int totalWaterConsumed=0;
         Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
         for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
@@ -158,10 +160,10 @@ public class MainActivity extends AppCompatActivity {
             totalWaterConsumed+= entry.getValue();
 
         }
-        if(totalWaterConsumed>2000){
+        if(totalWaterConsumed<2000){
             Toast.makeText(this, "YOU SHOULD DRINK WATER", Toast.LENGTH_SHORT).show();
             progress=totalWaterConsumed;
-            addNotification();
+            addNotification("DRINK WATER");
             //showNotification(this,"abc","abc");
         }
         updateProgressBar();
@@ -430,7 +432,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void addNotification() {
+    private void addNotification(String message) {
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
 // The id of the channel.
@@ -466,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.circle) //set icon for notification
                         .setContentTitle("DrinkWater") //set title of notification
-                        .setContentText("YOU SHOULD DRINK WATER")//this is notification message
+                        .setContentText(message)//this is notification message
                         .setAutoCancel(true) // makes auto cancel of notification
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT).setChannelId(id); //set priority of notification
 
@@ -646,8 +648,10 @@ public class MainActivity extends AppCompatActivity {
         if(totalWaterConsumed>=2000){
             Toast.makeText(this, "yeterince su içtin", Toast.LENGTH_SHORT).show();
             progress=totalWaterConsumed;
-            addNotification();
             //showNotification(this,"abc","abc");
+        }
+        else{
+            addNotification("DRINK WATER");
         }
         updateProgressBar();
 
@@ -657,6 +661,10 @@ public class MainActivity extends AppCompatActivity {
         Date date = new Date();
         String timeDate = format.format(date);
         return timeDate;
+    }
+    public static String getFormattedDate(Calendar calendar) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+        return sdf.format(calendar.getTime());
     }
     private boolean isServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);

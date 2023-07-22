@@ -155,10 +155,10 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
     public Map<String, Integer> getWeeklyWaterConsumption() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-        String startDate = getFormattedDate(calendar);
+        String startDate = MainActivity.getFormattedDate(calendar);
 
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY);
-        String endDate = getFormattedDate(calendar);
+        String endDate = MainActivity.getFormattedDate(calendar);
 
         Map<String, Integer> weeklyWaterConsumptionMap = new HashMap<>();
         SQLiteDatabase db = getReadableDatabase();
@@ -180,10 +180,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         return weeklyWaterConsumptionMap;
     }
 
-    private String getFormattedDate(Calendar calendar) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
-        return sdf.format(calendar.getTime());
-    }
+
 
     public Map<String, Integer> getStepCount() {
 

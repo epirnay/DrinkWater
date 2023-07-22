@@ -217,5 +217,5 @@ public class ChartActivity extends AppCompatActivity {
         barEntries.add(new BarEntry(6f, 3));
         return barEntries;
     }
-    
+
 }
