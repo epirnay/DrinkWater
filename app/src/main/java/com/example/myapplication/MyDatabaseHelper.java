@@ -13,7 +13,10 @@ import androidx.annotation.Nullable;
 
 import org.w3c.dom.Text;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class MyDatabaseHelper extends SQLiteOpenHelper{
@@ -149,6 +152,39 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         }
         return dailyWaterConsumptionMap;
     }
+    public Map<String, Integer> getWeeklyWaterConsumption() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        String startDate = getFormattedDate(calendar);
+
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY);
+        String endDate = getFormattedDate(calendar);
+
+        Map<String, Integer> weeklyWaterConsumptionMap = new HashMap<>();
+        SQLiteDatabase db = getReadableDatabase();
+
+        String query = "SELECT substr(date, 7, 2) as day, SUM(ml) as total_water FROM water_intake WHERE date BETWEEN ? AND ? GROUP BY day";
+
+
+        Cursor cursor = db.rawQuery(query, new String[]{startDate, endDate});
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") String day = cursor.getString(cursor.getColumnIndex("day"));
+                @SuppressLint("Range") int totalWaterConsumed = cursor.getInt(cursor.getColumnIndex("total_water"));
+                weeklyWaterConsumptionMap.put(day, totalWaterConsumed);
+            } while (cursor.moveToNext());
+
+            cursor.close();
+        }
+        return weeklyWaterConsumptionMap;
+    }
+
+    private String getFormattedDate(Calendar calendar) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+        return sdf.format(calendar.getTime());
+    }
+
     public Map<String, Integer> getStepCount() {
 
         Map<String, Integer> dailyStepMap = new HashMap<>();

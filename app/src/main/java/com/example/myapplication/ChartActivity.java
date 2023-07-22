@@ -81,9 +81,6 @@ public class ChartActivity extends AppCompatActivity {
 
         // Create a LineGraphSeries using the DataPoint array
         LineGraphSeries<DataPoint> series = new LineGraphSeries<>(dataPoints);
-        for (DataPoint point : dataPoints) {
-            Log.d("GraphData", "X: " + point.getX() + ", Y: " + point.getY());
-        }
 
 
         // Set the title of the graph
@@ -220,4 +217,5 @@ public class ChartActivity extends AppCompatActivity {
         barEntries.add(new BarEntry(6f, 3));
         return barEntries;
     }
+    
 }
