@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             checkWaterConsumption();
             int mins = myDatabaseHelper.getLastDataFromColumn("settingsDB", "remind_mins");
-            handler.postDelayed(this, 30 * 60 * 1000); // Remind minutes the user entered.
+            handler.postDelayed(this, mins * 60 * 1000); // Remind minutes the user entered.
         }
     };
 
