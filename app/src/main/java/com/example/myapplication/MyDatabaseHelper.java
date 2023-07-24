@@ -213,6 +213,60 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
     }
 
 
+    // TODO UPDATE QUERY AND NAMES
+    public Map<String, Integer> getDailyStepCount() {
+        String now = MainActivity.getFormattedDate();
+        String today = now.substring(0, 8);
+        Map<String, Integer> dailyStepCountMap = new HashMap<>();
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT substr(time, 1, 2) as time, SUM(step_count) as total_steps FROM stepCountDB WHERE date = ? GROUP BY substr(time, 1, 2)";
+
+        Cursor cursor = db.rawQuery(query, new String[]{today});
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") String time = cursor.getString(cursor.getColumnIndex("time"));
+                @SuppressLint("Range") int totalSteps = cursor.getInt(cursor.getColumnIndex("total_steps"));
+
+                // Add the time and total step count to the map.
+                dailyStepCountMap.put(time, totalSteps);
+            } while (cursor.moveToNext());
+
+            cursor.close();
+        }
+        return dailyStepCountMap;
+    }
+    // TODO UPDATE QUERY AND NAMES
+    // Method to get weekly step count for each day of the week
+    public Map<String, Integer> getWeeklyStepCount() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        String startDate = MainActivity.getFormattedDate(calendar);
+
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY);
+        String endDate = MainActivity.getFormattedDate(calendar);
+
+        Map<String, Integer> weeklyStepCountMap = new HashMap<>();
+        SQLiteDatabase db = getReadableDatabase();
+
+        String query = "SELECT substr(date, 7, 2) as day, SUM(step_count) as total_steps FROM stepCountDB WHERE date BETWEEN ? AND ? GROUP BY day";
+
+        Cursor cursor = db.rawQuery(query, new String[]{startDate, endDate});
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") String day = cursor.getString(cursor.getColumnIndex("day"));
+                @SuppressLint("Range") int totalSteps = cursor.getInt(cursor.getColumnIndex("total_steps"));
+
+                // Add the day and total step count to the map.
+                weeklyStepCountMap.put(day, totalSteps);
+            } while (cursor.moveToNext());
+
+            cursor.close();
+        }
+        return weeklyStepCountMap;
+    }
+
     @SuppressLint("Range")
     public int getLastDataFromColumn(String tableName, String columnName) {
         SQLiteDatabase db = this.getReadableDatabase();

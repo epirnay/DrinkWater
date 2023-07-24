@@ -63,7 +63,9 @@ public class ChartActivity extends AppCompatActivity {
         MyDatabaseHelper myDatabaseHelper = MyDatabaseHelper.getInstance(this);
 
         Map<String, Integer> dailyWaterConsumptionMap = myDatabaseHelper.getDailyWaterConsumption();
-        Map<String, Integer> stepMap = myDatabaseHelper.getStepCount();
+
+        // TODO GET STEP COUNT OF WHAT TIME PERIOD???
+        Map<String, Integer> stepMap = myDatabaseHelper.getDailyStepCount();
 
         // Create an array of DataPoint to hold the data
         DataPoint[] dataPoints = new DataPoint[dailyWaterConsumptionMap.size()];
@@ -88,6 +90,7 @@ public class ChartActivity extends AppCompatActivity {
         for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
             String time = entry.getKey();
             time=time.substring(0,2);
+
             int dateInt=Integer.parseInt(time);
             //if(dateInt==15){
             // dateInt=13;

@@ -165,6 +165,8 @@ public class MainActivity extends AppCompatActivity {
             progress=totalWaterConsumed;
             addNotification("DRINK WATER");
             //showNotification(this,"abc","abc");
+        }else{
+            addNotification("You have reached your goal.");
         }
         updateProgressBar();
 
@@ -222,6 +224,8 @@ public class MainActivity extends AppCompatActivity {
         if (!bluetoothAdapter.isEnabled()) {
             promptEnableBluetooth();
         }
+
+
     }
 
 

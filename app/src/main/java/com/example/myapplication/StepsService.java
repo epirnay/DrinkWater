@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -15,6 +16,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.SystemClock;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -33,15 +35,18 @@ public class StepsService extends Service implements SensorEventListener {
     private float lastSaved = 0f;
     private Handler handler = new Handler(Looper.getMainLooper());
     private boolean firstSave = true;
+    private static StepsService instance = null;
+    private int remindTime = 60;
     MyDatabaseHelper myDatabaseHelper;
     private final Runnable saveSteps = new Runnable() {
         @Override
         public void run() {
             saveSteps();
-           // int b=myDatabaseHelper.getLastDataFromColumn("settingsDB","remind_step");
+            int b=myDatabaseHelper.getLastDataFromColumn("settingsDB","remind_step");
             handler.postDelayed(this, 60 * 60 * 1000); // every 1 hour
         }
     };
+
 
     private void saveSteps() {
         String dateTimeString = MainActivity.getFormattedDate();
@@ -62,8 +67,11 @@ public class StepsService extends Service implements SensorEventListener {
     public void onCreate(){
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        handler.post(saveSteps);
-
+        instance = this;
+        scheduleAlarm();
+    }
+    public static StepsService getInstance() {
+        return instance;
     }
     @Nullable
     @Override
@@ -143,5 +151,44 @@ public class StepsService extends Service implements SensorEventListener {
 
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         manager.notify(NOTIF_ID, notification);
+    }
+    public void scheduleAlarm() {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        //remindTime = myDatabaseHelper.getLastDataFromColumn("settingsDB","remind_step");
+        long repeatInterval = 60 * 60 * 1000;  // Every hour
+        long triggerTime = System.currentTimeMillis() + repeatInterval;
+
+        if (alarmManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+            }
+            else {
+                alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, triggerTime, repeatInterval, pendingIntent);
+            }
+        }
+    }
+
+    public float getTotalSteps() {
+        return totalSteps;
+    }
+
+    public void setLastSaved(float lastSaved) {
+        this.lastSaved = lastSaved;
+    }
+
+    public float getLastSaved() {
+        return lastSaved;
+    }
+
+    public boolean isFirstSave() {
+        return firstSave;
+    }
+
+    public void setFirstSave(boolean firstSave) {
+        this.firstSave = firstSave;
     }
 }
