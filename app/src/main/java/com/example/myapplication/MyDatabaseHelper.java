@@ -132,6 +132,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         String selection = "id=?";
         String[] selectionArgs = new String[]{String.valueOf(1)}; // Replace "1" with the ID of the row you want to update
 
+
         db.update("TABLE_NAME3", cv, selection, selectionArgs);
         db.close();
     }
@@ -142,6 +143,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         Map<String, Integer> dailyWaterConsumptionMap = new HashMap<>();
         SQLiteDatabase db = getReadableDatabase();
         String query = "SELECT substr(time, 1, 2) as time, SUM(ml) as total_water FROM water_intake WHERE date = ? GROUP BY substr(time, 1, 2)";
+
 
         Cursor cursor = db.rawQuery(query, new String[]{today});
 
@@ -158,6 +160,30 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         }
         return dailyWaterConsumptionMap;
     }
+
+    public Map<String, Integer> getStepCount() {
+        String now = MainActivity.getFormattedDate();
+        String today = now.substring(0, 8);
+        Map<String, Integer> dailyStepCountMap = new HashMap<>();
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT substr(time, 1, 2) as time, SUM(step_count) as total_step FROM stepCountDB WHERE date = ? GROUP BY substr(time, 1, 2)";
+
+        Cursor cursor = db.rawQuery(query, new String[]{today});
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") String time = cursor.getString(cursor.getColumnIndex("time"));
+                @SuppressLint("Range") int totalStepCount = cursor.getInt(cursor.getColumnIndex("total_step"));
+
+                // Add the date and total water consumption to the map.
+                dailyStepCountMap.put(time, totalStepCount);
+            } while (cursor.moveToNext());
+
+            cursor.close();
+        }
+        return dailyStepCountMap;
+    }
+
     public Map<String, Integer> getWeeklyWaterConsumption() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
@@ -184,30 +210,6 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
             cursor.close();
         }
         return weeklyWaterConsumptionMap;
-    }
-
-
-
-    public Map<String, Integer> getStepCount() {
-
-        Map<String, Integer> dailyStepMap = new HashMap<>();
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.
-
-                rawQuery("SELECT date, step_count as total_step FROM stepCountDB GROUP BY date", null);
-
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                @SuppressLint("Range") String date = cursor.getString(cursor.getColumnIndex("date"));
-                @SuppressLint("Range") int totalStep = cursor.getInt(cursor.getColumnIndex("total_step"));
-
-                // Add the date and total water consumption to the map.
-                dailyStepMap.put(date, totalStep);
-            } while (cursor.moveToNext());
-
-            cursor.close();
-        }
-        return dailyStepMap;
     }
 
 

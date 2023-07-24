@@ -71,10 +71,10 @@ public class ChartActivity extends AppCompatActivity {
         int index = 0;
         Map<String, Integer> treeMap2 = new TreeMap<String, Integer>(stepMap);
         for (Map.Entry<String, Integer> entry : treeMap2.entrySet()) {
-            String date = entry.getKey();
-            date=date.substring(8,10);
+            String time = entry.getKey();
+            time=time.substring(0,2);
 
-            int dateInt=Integer.parseInt(date);
+            int dateInt=Integer.parseInt(time);
             //if(dateInt==15){
             // dateInt=13;
             //}
@@ -83,15 +83,14 @@ public class ChartActivity extends AppCompatActivity {
             index++;
         }
 
-       index = 0;
+        index = 0;
         Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
         for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
-            String date = entry.getKey();
-            date=date.substring(8,10);
-
-            int dateInt=Integer.parseInt(date);
+            String time = entry.getKey();
+            time=time.substring(0,2);
+            int dateInt=Integer.parseInt(time);
             //if(dateInt==15){
-               // dateInt=13;
+            // dateInt=13;
             //}
             int totalWaterConsumed = entry.getValue();
             dataPoints[index] = new DataPoint(dateInt, totalWaterConsumed);
@@ -113,13 +112,17 @@ public class ChartActivity extends AppCompatActivity {
 
         // on below line we are setting
         // our title text size.
-        graphView.setTitleTextSize(18);
+        graphView.setTitleTextSize(14);
 
         // on below line we are adding
         // data series to our graph view.
         graphView.addSeries(series);
+        graphView.getViewport().setXAxisBoundsManual(true);
+        graphView.getViewport().setMinX(0);  // starting hour
+        graphView.getViewport().setMaxX(24); // end hour
 
-        graphViewStep.setTitle("St");
+
+        graphViewStep.setTitle("Daily Step Count");
 
         // Add the LineGraphSeries to the GraphView
         graphViewStep.addSeries(seriesStep);
@@ -130,13 +133,17 @@ public class ChartActivity extends AppCompatActivity {
 
         // on below line we are setting
         // our title text size.
-        graphViewStep.setTitleTextSize(18);
+        graphViewStep.setTitleTextSize(14);
 
         // on below line we are adding
         // data series to our graph view.
         graphViewStep.addSeries(seriesStep);
 
-        graphView.addSeries(series);
+        graphViewStep.getViewport().setXAxisBoundsManual(true);
+        graphViewStep.getViewport().setMinX(0);  // starting hour
+        graphViewStep.getViewport().setMaxX(24); // end hour
+
+
 
         barChart = findViewById(R.id.idBarChart);
 

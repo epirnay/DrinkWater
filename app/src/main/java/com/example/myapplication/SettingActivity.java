@@ -45,8 +45,8 @@ public class SettingActivity extends AppCompatActivity {
                 //myDB.SettingValues(Integer.parseInt(String.valueOf(editText)),Integer.parseInt(String.valueOf(editText2)),Integer.parseInt(String.valueOf(editText3)),Integer.parseInt(String.valueOf(editText6)));
                 String value1 = editText.getText().toString().trim();
                 String value2 = editText2.getText().toString().trim();
-                String value3 = editText3.getText().toString().trim();
-                String value4 = editText6.getText().toString().trim();
+                String value3 = editText6.getText().toString().trim();
+                String value4 = editText3.getText().toString().trim();
 
                 // Check if the values are not empty before parsing
                 if (!value1.isEmpty() && !value2.isEmpty() && !value3.isEmpty() && !value4.isEmpty()) {
@@ -62,10 +62,7 @@ public class SettingActivity extends AppCompatActivity {
                 }
             }
         });
-
         //myDB.SettingValues();
-
-
     }
 
 
