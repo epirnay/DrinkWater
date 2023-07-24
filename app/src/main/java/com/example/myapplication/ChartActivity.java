@@ -27,9 +27,11 @@ public class ChartActivity extends AppCompatActivity {
     // variable for our bar chart
     BarChart barChart;
 
+
     // variable for our bar data set.
     BarDataSet barDataSet1, barDataSet2;
 
+    BarDataSet barDataSet3, barDataSet4;
     Button buttonToSettings;
 
     // array list for storing entries.
@@ -38,6 +40,7 @@ public class ChartActivity extends AppCompatActivity {
     // creating a string array for displaying days.
     String[] days = new String[]{"Sunday", "Monday", "Tuesday", "Thursday", "Friday", "Saturday"};
     GraphView graphView;
+    GraphView graphViewStep;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +50,7 @@ public class ChartActivity extends AppCompatActivity {
 
         // initializing variable for bar chart.
         graphView = findViewById(R.id.idGraphView);
+        graphViewStep = findViewById(R.id.idGraphView2);
 
         buttonToSettings.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,11 +63,27 @@ public class ChartActivity extends AppCompatActivity {
         MyDatabaseHelper myDatabaseHelper = MyDatabaseHelper.getInstance(this);
 
         Map<String, Integer> dailyWaterConsumptionMap = myDatabaseHelper.getDailyWaterConsumption();
+        Map<String, Integer> stepMap = myDatabaseHelper.getStepCount();
 
         // Create an array of DataPoint to hold the data
         DataPoint[] dataPoints = new DataPoint[dailyWaterConsumptionMap.size()];
-
+        DataPoint[] dataPoints2 = new DataPoint[stepMap.size()];
         int index = 0;
+        Map<String, Integer> treeMap2 = new TreeMap<String, Integer>(stepMap);
+        for (Map.Entry<String, Integer> entry : treeMap2.entrySet()) {
+            String date = entry.getKey();
+            date=date.substring(8,10);
+
+            int dateInt=Integer.parseInt(date);
+            //if(dateInt==15){
+            // dateInt=13;
+            //}
+            int totalStep = entry.getValue();
+            dataPoints2[index] = new DataPoint(dateInt, totalStep);
+            index++;
+        }
+
+       index = 0;
         Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
         for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
             String date = entry.getKey();
@@ -80,7 +100,7 @@ public class ChartActivity extends AppCompatActivity {
 
         // Create a LineGraphSeries using the DataPoint array
         LineGraphSeries<DataPoint> series = new LineGraphSeries<>(dataPoints);
-
+        LineGraphSeries<DataPoint> seriesStep = new LineGraphSeries<>(dataPoints2);
         // Set the title of the graph
         graphView.setTitle("Daily Water Consumption");
 
@@ -98,6 +118,26 @@ public class ChartActivity extends AppCompatActivity {
         // on below line we are adding
         // data series to our graph view.
         graphView.addSeries(series);
+
+        graphViewStep.setTitle("St");
+
+        // Add the LineGraphSeries to the GraphView
+        graphViewStep.addSeries(seriesStep);
+
+        // on below line we are setting
+        // text color to our graph view.
+        graphViewStep.setTitleColor(com.google.android.material.R.color.design_default_color_error);
+
+        // on below line we are setting
+        // our title text size.
+        graphViewStep.setTitleTextSize(18);
+
+        // on below line we are adding
+        // data series to our graph view.
+        graphViewStep.addSeries(seriesStep);
+
+        graphView.addSeries(series);
+
         barChart = findViewById(R.id.idBarChart);
 
         // creating a new bar data set.
@@ -176,6 +216,7 @@ public class ChartActivity extends AppCompatActivity {
         // below line is to invalidate
         // our bar chart.
         barChart.invalidate();
+
     }
 
     // array list for first set

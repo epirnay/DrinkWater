@@ -115,7 +115,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         long result = db.insert(TABLE_NAME2, null, cv);
     }
 
-    //CREATE DATABASE TABLE OF SETTING SCREEEN VALUES
+    //CREATE DATABASE TABLE OF SETTING SCREEEN VALUES (UPDATE TABLE)
     void SettingValues (int daily_intake, int daily_step, int remind_step, int remind_mins){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
@@ -124,7 +124,13 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         cv.put(COLUMN_DAILYSTEP, daily_step);
         cv.put(COLUMN_REMINDSTEP, remind_step);
         cv.put(COLUMN_REMINDMINS, remind_mins);
-        long result = db.insert(TABLE_NAME3, null, cv);
+
+        // Specify the WHERE clause to identify the row to update
+        String selection = "id=?";
+        String[] selectionArgs = new String[]{String.valueOf(1)}; // Replace "1" with the ID of the row you want to update
+
+        db.update("TABLE_NAME3", cv, selection, selectionArgs);
+        db.close();
     }
 
     public Map<String, Integer> getDailyWaterConsumption() {

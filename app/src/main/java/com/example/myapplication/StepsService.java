@@ -33,11 +33,12 @@ public class StepsService extends Service implements SensorEventListener {
     private float lastSaved = 0f;
     private Handler handler = new Handler(Looper.getMainLooper());
     private boolean firstSave = true;
+    MyDatabaseHelper myDatabaseHelper;
     private final Runnable saveSteps = new Runnable() {
         @Override
         public void run() {
             saveSteps();
-
+           // int b=myDatabaseHelper.getLastDataFromColumn("settingsDB","remind_step");
             handler.postDelayed(this, 60 * 60 * 1000); // every 1 hour
         }
     };

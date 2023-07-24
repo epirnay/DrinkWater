@@ -109,8 +109,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             checkWaterConsumption();
-            int mins = myDatabaseHelper.getLastDataFromColumn("settingsDB", "remind_mins");
-            handler.postDelayed(this, mins * 60 * 1000); // Remind minutes the user entered.
+
+            int a=myDatabaseHelper.getLastDataFromColumn("settingsDB","remind_mins");
+            handler.postDelayed(this, a * 60 * 1000); // Remind minutes the user entered.
         }
     };
 
@@ -122,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         handler.post(notificationRunnable);
         myDatabaseHelper = MyDatabaseHelper.getInstance(this);
+
         //myDB.addIntake("20230718161024",250);
         //myDB.addStep("20230718161024",5);
         // getting adapters
@@ -146,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
         textView = (TextView) findViewById(R.id.text_view_progress);
         scanButton = (Button) findViewById(R.id.scan_button);
         Map<String, Integer> dailyWaterConsumptionMap = myDatabaseHelper.getDailyWaterConsumption();
+
         //myDB.addStep("20230718161024",5);
         //myDatabaseHelper.addStep("1",5);
 
@@ -161,8 +164,10 @@ public class MainActivity extends AppCompatActivity {
         if(totalWaterConsumed>2000){
             Toast.makeText(this, "YOU SHOULD DRINK WATER", Toast.LENGTH_SHORT).show();
             progress=totalWaterConsumed;
-            addNotification();
+            addNotification("yeterince su içtin");
             //showNotification(this,"abc","abc");
+        }else{
+            addNotification("yeterli su miktarına ulaşmadın");
         }
         updateProgressBar();
 
@@ -435,7 +440,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void addNotification() {
+    private void addNotification(String value) {
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
 // The id of the channel.
@@ -471,7 +476,7 @@ public class MainActivity extends AppCompatActivity {
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.circle) //set icon for notification
                         .setContentTitle("DrinkWater") //set title of notification
-                        .setContentText("YOU SHOULD DRINK WATER")//this is notification message
+                        .setContentText(value)//this is notification message
                         .setAutoCancel(true) // makes auto cancel of notification
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT).setChannelId(id); //set priority of notification
 
@@ -652,9 +657,12 @@ public class MainActivity extends AppCompatActivity {
         if(totalWaterConsumed>=2000){
             Toast.makeText(this, "yeterince su içtin", Toast.LENGTH_SHORT).show();
             progress=totalWaterConsumed;
-            addNotification();
+            addNotification("yeterince su içtin");
             //showNotification(this,"abc","abc");
+        }else{
+            addNotification("gerekli su miktarına ulaşmadın");
         }
+
         updateProgressBar();
 
     }

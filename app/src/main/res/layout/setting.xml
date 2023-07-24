@@ -2,7 +2,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#ADD8E6">>
 
 
         <EditText
@@ -12,14 +13,15 @@
             android:layout_centerInParent="true"
             android:layout_marginTop="92dp"
             android:layout_marginBottom="9dp"
-            android:background="#FFFFFF"
+            android:background="#E6E6FA"
             android:hint="1000"
             android:inputType="number"
             app:layout_constraintBottom_toTopOf="@+id/editText3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.724"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView9" />
+            app:layout_constraintTop_toBottomOf="@+id/textView9"
+            />
 
         <CheckBox
             android:id="@+id/checkBox2"
@@ -52,7 +54,7 @@
             android:layout_height="48dp"
             android:layout_centerInParent="true"
             android:layout_marginTop="196dp"
-            android:background="#FFFFFF"
+            android:background="#E6E6FA"
             android:hint="30"
             android:inputType="number"
             app:layout_constraintEnd_toEndOf="parent"
@@ -66,7 +68,7 @@
             android:layout_height="48dp"
             android:layout_centerInParent="true"
             android:layout_marginBottom="500dp"
-            android:background="#FFFFFF"
+            android:background="#E6E6FA"
             android:hint="1000"
             android:inputType="number"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -89,14 +91,15 @@
             app:layout_constraintBottom_toTopOf="@+id/editText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:textStyle="bold"/>
 
         <EditText
             android:id="@+id/editText"
             android:layout_width="156dp"
             android:layout_height="48dp"
             android:layout_centerInParent="true"
-            android:background="#FFFFFF"
+            android:background="#E6E6FA"
             android:hint="3000"
             android:inputType="number"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -156,7 +159,8 @@
             app:layout_constraintHorizontal_bias="0.101"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView9"
-            app:layout_constraintVertical_bias="0.126" />
+            app:layout_constraintVertical_bias="0.126"
+            android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/textView11"
