@@ -3,6 +3,7 @@ package com.example.myapplication;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -60,8 +61,10 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -109,9 +112,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             checkWaterConsumption();
-
-            int a=myDatabaseHelper.getLastDataFromColumn("settingsDB","remind_mins");
-            handler.postDelayed(this, a * 60 * 1000); // Remind minutes the user entered.
+            int mins = myDatabaseHelper.getLastDataFromColumn("settingsDB", "remind_mins");
+            handler.postDelayed(this, mins * 60 * 1000); // Remind minutes the user entered.
         }
     };
 
@@ -123,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         handler.post(notificationRunnable);
         myDatabaseHelper = MyDatabaseHelper.getInstance(this);
-
         //myDB.addIntake("20230718161024",250);
         //myDB.addStep("20230718161024",5);
         // getting adapters
@@ -148,26 +149,22 @@ public class MainActivity extends AppCompatActivity {
         textView = (TextView) findViewById(R.id.text_view_progress);
         scanButton = (Button) findViewById(R.id.scan_button);
         Map<String, Integer> dailyWaterConsumptionMap = myDatabaseHelper.getDailyWaterConsumption();
-
         //myDB.addStep("20230718161024",5);
         //myDatabaseHelper.addStep("1",5);
 
-
+        // TODO make dynamic
         int totalWaterConsumed=0;
         Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
         for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
             String date = entry.getKey();
-            date=date.substring(8,10);
             totalWaterConsumed+= entry.getValue();
 
         }
-        if(totalWaterConsumed>2000){
+        if(totalWaterConsumed<2000){
             Toast.makeText(this, "YOU SHOULD DRINK WATER", Toast.LENGTH_SHORT).show();
             progress=totalWaterConsumed;
-            addNotification("yeterince su içtin");
+            addNotification("DRINK WATER");
             //showNotification(this,"abc","abc");
-        }else{
-            addNotification("yeterli su miktarına ulaşmadın");
         }
         updateProgressBar();
 
@@ -206,13 +203,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        Intent serviceIntent = new Intent(this, StepsService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
+        if (!isServiceRunning(StepsService.class)) {
+            Intent serviceIntent = new Intent(this, StepsService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent);
+            } else {
+                startService(serviceIntent);  // For older versions
+            }
         }
-
-
-
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             LocationManager lm = (LocationManager)MainActivity.this.getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
@@ -223,12 +221,6 @@ public class MainActivity extends AppCompatActivity {
         }
         if (!bluetoothAdapter.isEnabled()) {
             promptEnableBluetooth();
-        }
-        for (int i = 10; i < 21; i++) {
-            for (int j = 0; j < 24; j++) {
-                myDatabaseHelper.addIntake("202307" + String.valueOf(i) , String.valueOf(j) + "1024", 150);
-                myDatabaseHelper.addStep("202307" + String.valueOf(i) , String.valueOf(j) + "1024", 250);
-            }
         }
     }
 
@@ -440,7 +432,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void addNotification(String value) {
+    private void addNotification(String message) {
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
 // The id of the channel.
@@ -476,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.circle) //set icon for notification
                         .setContentTitle("DrinkWater") //set title of notification
-                        .setContentText(value)//this is notification message
+                        .setContentText(message)//this is notification message
                         .setAutoCancel(true) // makes auto cancel of notification
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT).setChannelId(id); //set priority of notification
 
@@ -649,28 +641,40 @@ public class MainActivity extends AppCompatActivity {
         int totalWaterConsumed=0;
         Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
         for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
-            String date = entry.getKey();
-            date=date.substring(8,10);
+
             totalWaterConsumed+= entry.getValue();
 
         }
         if(totalWaterConsumed>=2000){
             Toast.makeText(this, "yeterince su içtin", Toast.LENGTH_SHORT).show();
             progress=totalWaterConsumed;
-            addNotification("yeterince su içtin");
             //showNotification(this,"abc","abc");
-        }else{
-            addNotification("gerekli su miktarına ulaşmadın");
         }
-
+        else{
+            addNotification("DRINK WATER");
+        }
         updateProgressBar();
 
     }
-    private String getFormattedDate(){
+    public static String getFormattedDate(){
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
         Date date = new Date();
         String timeDate = format.format(date);
         return timeDate;
     }
+    public static String getFormattedDate(Calendar calendar) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
+        return sdf.format(calendar.getTime());
+    }
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 }
