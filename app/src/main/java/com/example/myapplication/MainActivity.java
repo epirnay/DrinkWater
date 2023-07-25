@@ -368,6 +368,7 @@ public class MainActivity extends AppCompatActivity {
                 myDB.addIntake(date, time, ml);
                 progress=progress+ml;
                 updateProgressBar();
+                StepsService.getInstance().stopAndRestartRunnable();
             }
 
         }

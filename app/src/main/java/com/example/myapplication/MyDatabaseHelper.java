@@ -296,4 +296,21 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         }
         db.close();
     }
+    public String getLastRecordDateTime() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String selectQuery = "SELECT date || time AS datetime FROM " + TABLE_NAME + " ORDER BY id DESC LIMIT 1";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                String datetime = cursor.getString(0);
+                cursor.close();
+                return datetime;
+            }
+            cursor.close();
+        }
+
+        return "0";
+    }
+
 }

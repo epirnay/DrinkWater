@@ -11,7 +11,7 @@ import android.util.Log;
 public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i("ALARM", "Alarm received.");
+        Log.i("ALERT", "Alarm received.");
         MyDatabaseHelper mdh = MyDatabaseHelper.getInstance(context.getApplicationContext());
         StepsService ss = StepsService.getInstance();
         String now = MainActivity.getFormattedDate();

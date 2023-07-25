@@ -39,19 +39,20 @@ public class StepsService extends Service implements SensorEventListener {
     private boolean firstSave = true;
     private static StepsService instance = null;
     private MyDatabaseHelper myDatabaseHelper;
-    private int remindTime;
-    private final Runnable saveSteps = new Runnable() {
+    private long firstStepTime;
+    private long lastStepTime;
+    private final Runnable remindByTime = new Runnable() {
         @Override
         public void run() {
 
-            int remindMinute=myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_REMINDMINS);
+            int remindTime = myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_REMINDMINS);
 
             if(MainActivity.getTotalWaterConsumed() < myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_DAILYINTAKE)){
-                addNotification(remindMinute + " minute(s) has passed, you should drink water.");
+                addNotification(remindTime + " minute(s) has passed, you should drink water.");
             }
 
 
-            handler.postDelayed(this, remindMinute * 60 * 1000);
+            handler.postDelayed(this, remindTime * 60 * 1000);
         }
     };
     @Override
@@ -60,8 +61,14 @@ public class StepsService extends Service implements SensorEventListener {
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         instance = this;
         myDatabaseHelper = MyDatabaseHelper.getInstance(this);
-        saveSteps.run();
+        firstStepTime = Long.parseLong(MainActivity.getFormattedDate());
+        remindByTime.run();
         scheduleAlarm();
+    }
+    public void stopAndRestartRunnable() {
+        int remindMinute=myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_REMINDMINS);
+        handler.removeCallbacks(remindByTime);
+        handler.postDelayed(remindByTime, remindMinute * 60 * 1000);
     }
     public static StepsService getInstance() {
         return instance;
@@ -84,7 +91,12 @@ public class StepsService extends Service implements SensorEventListener {
             if(currentSteps > myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_REMINDSTEP)){
 
                 if(MainActivity.getTotalWaterConsumed() < myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_DAILYINTAKE)){
+                    // Control the water intake between first step and last step
+                    lastStepTime = Long.parseLong(MainActivity.getFormattedDate());
+                    Long lastRecordedWaterIntake = Long.parseLong(myDatabaseHelper.getLastRecordDateTime());
+                    if(!(lastRecordedWaterIntake <= lastStepTime && lastRecordedWaterIntake >= firstStepTime))
                     addNotification("You have taken + " + currentSteps + " step(s), you should drink water.");
+                    firstStepTime = lastStepTime;
                 }
 
                 // save
@@ -154,25 +166,24 @@ public class StepsService extends Service implements SensorEventListener {
     }
     public void scheduleAlarm() {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Log.i("ALERT", "ALERT HAS BEEN SET");
 
         Intent intent = new Intent(this, AlarmReceiver.class);
         intent.setAction("SAVE_STEPS");
         int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_IMMUTABLE : 0;
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, flags);
 
-        remindTime = myDatabaseHelper.getLastDataFromColumn("settingsDB","remind_step");
-        long repeatInterval = 60 * 60 * 1000;
+        long repeatInterval = 30 * 60 * 1000;
         long triggerTime = SystemClock.elapsedRealtime() + repeatInterval;
 
 
         if (alarmManager != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Log.i("ALARM", "scheduleAlarm: " + remindTime);
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                         triggerTime, pendingIntent);
             }
             else {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+                alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerTime, pendingIntent);
             }
         }
     }
