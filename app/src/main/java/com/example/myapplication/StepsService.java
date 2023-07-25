@@ -45,7 +45,12 @@ public class StepsService extends Service implements SensorEventListener {
         public void run() {
 
             int remindMinute=myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_REMINDMINS);
-            addNotification(remindMinute + " minute(s) has passed, drink water.");
+
+            if(MainActivity.getTotalWaterConsumed() < myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_DAILYINTAKE)){
+                addNotification(remindMinute + " minute(s) has passed, you should drink water.");
+            }
+
+
             handler.postDelayed(this, remindMinute * 60 * 1000);
         }
     };
@@ -78,7 +83,10 @@ public class StepsService extends Service implements SensorEventListener {
             // To notify, get difference between records
             if(currentSteps > myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_REMINDSTEP)){
 
-                addNotification("You have taken too much steps, drink water.");
+                if(MainActivity.getTotalWaterConsumed() < myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_DAILYINTAKE)){
+                    addNotification("You have taken + " + currentSteps + " step(s), you should drink water.");
+                }
+
                 // save
                 previousTotalSteps = totalSteps;
             }

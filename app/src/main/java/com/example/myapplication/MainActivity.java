@@ -105,17 +105,11 @@ public class MainActivity extends AppCompatActivity {
     UUID suuid;
     UUID cuuid;
     MyDatabaseHelper myDatabaseHelper;
+    private static int totalWaterConsumed;
+    public static int getTotalWaterConsumed() {
+        return totalWaterConsumed;
+    }
 
-    private Handler handler = new Handler(Looper.getMainLooper());
-
-    private final Runnable notificationRunnable = new Runnable() {
-        @Override
-        public void run() {
-            checkWaterConsumption();
-            int mins = myDatabaseHelper.getLastDataFromColumn("settingsDB", "remind_mins");
-            handler.postDelayed(this, mins * 60 * 1000); // Remind minutes the user entered.
-        }
-    };
 
 
     @Override
@@ -123,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        handler.post(notificationRunnable);
         myDatabaseHelper = MyDatabaseHelper.getInstance(this);
         //myDB.addIntake("20230718161024",250);
         //myDB.addStep("20230718161024",5);
@@ -153,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
         //myDatabaseHelper.addStep("1",5);
 
         // TODO make dynamic
-        int totalWaterConsumed=0;
+        totalWaterConsumed = 0;
         Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
         for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
             String date = entry.getKey();
