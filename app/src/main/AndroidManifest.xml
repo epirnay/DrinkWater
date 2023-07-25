@@ -21,12 +21,15 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -57,7 +60,12 @@
         <activity
             android:name=".NotificationView"
             android:screenOrientation="portrait" />
-        <receiver android:name=".AlarmReceiver"/>
+        <receiver android:name=".AlarmReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="SAVE_STEPS" />
+            </intent-filter>
+        </receiver>
+
 
     </application>
 

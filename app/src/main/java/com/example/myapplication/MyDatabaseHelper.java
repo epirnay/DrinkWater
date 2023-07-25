@@ -81,6 +81,13 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
                 COLUMN_REMINDMINS + " INTEGER) ;";
         db.execSQL(query3);
 
+        // DEFAULT SETTINGS ON FRESH INSTALL
+        ContentValues cv = new ContentValues();
+        cv.put(COLUMN_DAILYINTAKE, 1500);
+        cv.put(COLUMN_DAILYSTEP, 10000);
+        cv.put(COLUMN_REMINDMINS, 60);
+        cv.put(COLUMN_REMINDSTEP, 200);
+        db.insert(TABLE_NAME3, null, cv);
     }
 
     @Override
@@ -118,24 +125,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         long result = db.insert(TABLE_NAME2, null, cv);
     }
 
-    //CREATE DATABASE TABLE OF SETTING SCREEEN VALUES (UPDATE TABLE)
-    void SettingValues (int daily_intake, int daily_step, int remind_step, int remind_mins){
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
 
-        cv.put(COLUMN_DAILYINTAKE, daily_intake);
-        cv.put(COLUMN_DAILYSTEP, daily_step);
-        cv.put(COLUMN_REMINDSTEP, remind_step);
-        cv.put(COLUMN_REMINDMINS, remind_mins);
-
-        // Specify the WHERE clause to identify the row to update
-        String selection = "id=?";
-        String[] selectionArgs = new String[]{String.valueOf(1)}; // Replace "1" with the ID of the row you want to update
-
-
-        db.update("TABLE_NAME3", cv, selection, selectionArgs);
-        db.close();
-    }
 
     public Map<String, Integer> getDailyWaterConsumption() {
         String now = MainActivity.getFormattedDate();
@@ -282,5 +272,28 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
 
         return result;
     }
+    //CREATE DATABASE TABLE OF SETTING SCREEEN VALUES (UPDATE TABLE)
+    void SettingValues (int daily_intake, int daily_step, int remind_step, int remind_mins){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
 
+        cv.put(COLUMN_DAILYINTAKE, daily_intake);
+        cv.put(COLUMN_DAILYSTEP, daily_step);
+        cv.put(COLUMN_REMINDSTEP, remind_step);
+        cv.put(COLUMN_REMINDMINS, remind_mins);
+
+        // Specify the WHERE clause to identify the row to update
+        String selection = "id=?";
+        String[] selectionArgs = new String[]{String.valueOf(1)}; // Replace "1" with the ID of the row you want to update
+
+
+        int result = db.update(TABLE_NAME3, cv, selection, selectionArgs);
+        if (result == -1){
+            Toast.makeText(context, "failed", Toast.LENGTH_SHORT).show();
+
+        }else {
+            Toast.makeText(context, "Added Successfully!", Toast.LENGTH_SHORT).show();
+        }
+        db.close();
+    }
 }

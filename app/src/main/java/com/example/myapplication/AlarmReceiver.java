@@ -6,10 +6,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Log;
 
 public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.i("ALARM", "Alarm received.");
         MyDatabaseHelper mdh = MyDatabaseHelper.getInstance(context.getApplicationContext());
         StepsService ss = StepsService.getInstance();
         String now = MainActivity.getFormattedDate();
@@ -20,21 +22,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             ss.setLastSaved(ss.getTotalSteps());
         }
         mdh.addStep(date, time, (int) (ss.getTotalSteps() - ss.getLastSaved()));
-        scheduleAlarm(context);
+        ss.scheduleAlarm();
     }
-    private void scheduleAlarm(Context context) {
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-        long repeatInterval = 60 * 60 * 1000;
-        long triggerAtMillis = System.currentTimeMillis() + repeatInterval;  // 1 hour from now
-        if (alarmManager != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent);
-            }
-            else {
-                alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis, repeatInterval, pendingIntent);
-            }
-        }
-    }
+
 }

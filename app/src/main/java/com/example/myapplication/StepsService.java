@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -17,6 +18,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -30,44 +32,30 @@ public class StepsService extends Service implements SensorEventListener {
     public static final String CHANNEL_ID = "StepsServiceChannel";
     public static final int NOTIF_ID = 101;
     private float totalSteps = 0f;
+
     private float previousTotalSteps = 0f;
-    private boolean stepsInit = true;
     private float lastSaved = 0f;
     private Handler handler = new Handler(Looper.getMainLooper());
     private boolean firstSave = true;
     private static StepsService instance = null;
-    private int remindTime = 60;
-    MyDatabaseHelper myDatabaseHelper;
+    private MyDatabaseHelper myDatabaseHelper;
+    private int remindTime;
     private final Runnable saveSteps = new Runnable() {
         @Override
         public void run() {
-            saveSteps();
-            int b=myDatabaseHelper.getLastDataFromColumn("settingsDB","remind_step");
-            handler.postDelayed(this, 60 * 60 * 1000); // every 1 hour
+
+            int remindMinute=myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_REMINDMINS);
+            addNotification(remindMinute + " minute(s) has passed, drink water.");
+            handler.postDelayed(this, remindMinute * 60 * 1000);
         }
     };
-
-
-    private void saveSteps() {
-        String dateTimeString = MainActivity.getFormattedDate();
-        int stepsToSave = (int) (totalSteps - lastSaved);
-        if(firstSave){
-            stepsToSave = 0;
-            firstSave = false;
-        }
-        lastSaved = totalSteps;
-        MyDatabaseHelper myDatabaseHelper = MyDatabaseHelper.getInstance(this);
-        String datee = dateTimeString.substring(0,8);
-        String timee = dateTimeString.substring(8,14);
-        myDatabaseHelper.addStep(datee, timee, stepsToSave);
-    }
-
-
     @Override
     public void onCreate(){
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         instance = this;
+        myDatabaseHelper = MyDatabaseHelper.getInstance(this);
+        saveSteps.run();
         scheduleAlarm();
     }
     public static StepsService getInstance() {
@@ -83,12 +71,16 @@ public class StepsService extends Service implements SensorEventListener {
     public void onSensorChanged(SensorEvent sensorEvent) {
         if(sensorEvent.sensor.equals(stepSensor)){
             totalSteps = (int) sensorEvent.values[0];
-
+            // USE previousTotalSteps to send notification ever X steps
             int currentSteps = (int) (totalSteps - previousTotalSteps);
-            if(stepsInit){
+
+
+            // To notify, get difference between records
+            if(currentSteps > myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_REMINDSTEP)){
+
+                addNotification("You have taken too much steps, drink water.");
+                // save
                 previousTotalSteps = totalSteps;
-                stepsInit = false;
-                currentSteps = 0;
             }
             updateNotification(currentSteps);
 
@@ -156,18 +148,23 @@ public class StepsService extends Service implements SensorEventListener {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
         Intent intent = new Intent(this, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        intent.setAction("SAVE_STEPS");
+        int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_IMMUTABLE : 0;
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, flags);
 
-        //remindTime = myDatabaseHelper.getLastDataFromColumn("settingsDB","remind_step");
-        long repeatInterval = 60 * 60 * 1000;  // Every hour
-        long triggerTime = System.currentTimeMillis() + repeatInterval;
+        remindTime = myDatabaseHelper.getLastDataFromColumn("settingsDB","remind_step");
+        long repeatInterval = 60 * 60 * 1000;
+        long triggerTime = SystemClock.elapsedRealtime() + repeatInterval;
+
 
         if (alarmManager != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+                Log.i("ALARM", "scheduleAlarm: " + remindTime);
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                        triggerTime, pendingIntent);
             }
             else {
-                alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, triggerTime, repeatInterval, pendingIntent);
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
             }
         }
     }
@@ -190,5 +187,74 @@ public class StepsService extends Service implements SensorEventListener {
 
     public void setFirstSave(boolean firstSave) {
         this.firstSave = firstSave;
+    }
+    // TODO fix redundancy
+    private void addNotification(String message) {
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+// The id of the channel.
+        String id = "my_channel_02";
+
+// The user-visible name of the channel.
+        CharSequence name = "abcd";
+
+// The user-visible description of the channel.
+        String description = "abcd";
+
+        int importance = NotificationManager.IMPORTANCE_LOW;
+
+        NotificationChannel mChannel = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            mChannel = new NotificationChannel(id, name,importance);
+            mChannel.setDescription(description);
+
+            mChannel.enableLights(true);
+// Sets the notification light color for notifications posted to this
+// channel, if the device supports this feature.
+            mChannel.setLightColor(Color.RED);
+
+            mChannel.enableVibration(true);
+            mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+
+            mNotificationManager.createNotificationChannel(mChannel);
+        }
+
+// Configure the notification channel.
+
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.circle) //set icon for notification
+                        .setContentTitle("DrinkWater") //set title of notification
+                        .setContentText(message)//this is notification message
+                        .setAutoCancel(true) // makes auto cancel of notification
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT).setChannelId(id); //set priority of notification
+
+
+        Intent notificationIntent = new Intent(this, NotificationView.class);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        //notification message will get at NotificationView
+        notificationIntent.putExtra("message", "This is a notification message");
+        PendingIntent notifyPendingIntent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            notifyPendingIntent = PendingIntent.getBroadcast(
+                    getApplication(),
+                    0,
+                    notificationIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE
+            );
+        } else {
+            notifyPendingIntent = PendingIntent.getBroadcast(
+                    getApplication(),
+                    0,
+                    notificationIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+            );
+        }
+        PendingIntent pendingIntent = notifyPendingIntent;
+        builder.setContentIntent(pendingIntent);
+
+        // Add as notification
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.notify(0, builder.build());
     }
 }
