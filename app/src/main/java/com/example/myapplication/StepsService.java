@@ -94,8 +94,9 @@ public class StepsService extends Service implements SensorEventListener {
                     // Control the water intake between first step and last step
                     lastStepTime = Long.parseLong(MainActivity.getFormattedDate());
                     Long lastRecordedWaterIntake = Long.parseLong(myDatabaseHelper.getLastRecordDateTime());
-                    if(!(lastRecordedWaterIntake <= lastStepTime && lastRecordedWaterIntake >= firstStepTime))
-                    addNotification("You have taken + " + currentSteps + " step(s), you should drink water.");
+                    if(!(lastRecordedWaterIntake <= lastStepTime && lastRecordedWaterIntake >= firstStepTime)){
+                        addNotification("You have taken + " + currentSteps + " step(s), you should drink water.");
+                    }
                     firstStepTime = lastStepTime;
                 }
 
@@ -173,7 +174,7 @@ public class StepsService extends Service implements SensorEventListener {
         int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_IMMUTABLE : 0;
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, flags);
 
-        long repeatInterval = 30 * 60 * 1000;
+        long repeatInterval = 60 * 60 * 1000;
         long triggerTime = SystemClock.elapsedRealtime() + repeatInterval;
 
 
