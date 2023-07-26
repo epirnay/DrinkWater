@@ -210,14 +210,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
         dailyIntake = myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_DAILYINTAKE);
-        if(totalWaterConsumed<dailyIntake){
-            Toast.makeText(this, "YOU SHOULD DRINK WATER", Toast.LENGTH_SHORT).show();
-            progress=totalWaterConsumed;
-            addNotification("DRINK WATER");
-            //showNotification(this,"abc","abc");
-        }else{
-            addNotification("You have reached your goal.");
-        }
+
         updateProgressBar();
 
         int leftWater = dailyIntake-progress;
@@ -644,26 +637,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void checkWaterConsumption() {
-        Map<String, Integer> dailyWaterConsumptionMap = myDatabaseHelper.getDailyWaterConsumption();
-        int totalWaterConsumed=0;
-        Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
-        for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
 
-            totalWaterConsumed+= entry.getValue();
-
-        }
-        if(totalWaterConsumed>=2000){
-            Toast.makeText(this, "yeterince su içtin", Toast.LENGTH_SHORT).show();
-            progress=totalWaterConsumed;
-            //showNotification(this,"abc","abc");
-        }
-        else{
-            addNotification("DRINK WATER");
-        }
-        updateProgressBar();
-
-    }
     public static String getFormattedDate(){
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
         Date date = new Date();

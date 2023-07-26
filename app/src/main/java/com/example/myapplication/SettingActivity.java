@@ -1,10 +1,13 @@
 package com.example.myapplication;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +15,10 @@ import androidx.appcompat.app.AppCompatActivity;
 public class SettingActivity extends AppCompatActivity {
 
     private Button buttonSave;
+    private TextView mlPerStep;
+    private EditText editText;
+    private EditText editText2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,15 +26,37 @@ public class SettingActivity extends AppCompatActivity {
 
         buttonSave = findViewById(R.id.buttonSave);
 
+
         MyDatabaseHelper myDB = MyDatabaseHelper.getInstance(this);
 
-        EditText editText = findViewById(R.id.editText);
+        mlPerStep = findViewById(R.id.textView9);
+        // DAILY WATER
+        editText = findViewById(R.id.editText);
         editText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(5) }); // Optional: Set maximum character length
         editText.setInputType(InputType.TYPE_CLASS_NUMBER);
 
-        EditText editText2 = findViewById(R.id.editText2);
+
+        // DAILY STEP
+        editText2 = findViewById(R.id.editText2);
         editText2.setFilters(new InputFilter[] { new InputFilter.LengthFilter(5) }); // Optional: Set maximum character length
         editText2.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                updateMlPerStep();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        };
+
+        editText.addTextChangedListener(textWatcher);
+        editText2.addTextChangedListener(textWatcher);
 
         EditText editText3 = findViewById(R.id.editText3);
         editText3.setFilters(new InputFilter[] { new InputFilter.LengthFilter(5) }); // Optional: Set maximum character length
@@ -64,6 +93,25 @@ public class SettingActivity extends AppCompatActivity {
         });
         //myDB.SettingValues();
     }
+    private void updateMlPerStep() {
+        String dailyWater = editText.getText().toString();
+        String dailyStep = editText2.getText().toString();
 
+        if (!dailyWater.isEmpty() && !dailyStep.isEmpty()) {
+            try {
+                int dailyWaterInt = Integer.parseInt(dailyWater);
+                int dailyStepInt = Integer.parseInt(dailyStep);
+
+                if (dailyStepInt != 0) {
+                    double mlPerStepValue = (double) dailyWaterInt / dailyStepInt;
+                    mlPerStep.setText("Goal " + mlPerStepValue + " ml for each step" );
+                } else {
+                    mlPerStep.setText("0");
+                }
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 }
