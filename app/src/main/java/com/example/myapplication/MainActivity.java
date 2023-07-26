@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
+    private int dailyIntake;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -143,36 +143,12 @@ public class MainActivity extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         textView = (TextView) findViewById(R.id.text_view_progress);
         scanButton = (Button) findViewById(R.id.scan_button);
-        Map<String, Integer> dailyWaterConsumptionMap = myDatabaseHelper.getDailyWaterConsumption();
+
         //myDB.addStep("20230718161024",5);
         //myDatabaseHelper.addStep("1",5);
 
         // TODO make dynamic
-        totalWaterConsumed = 0;
-        Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
-        for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
-            String date = entry.getKey();
-            totalWaterConsumed+= entry.getValue();
 
-        }
-        if(totalWaterConsumed<2000){
-            Toast.makeText(this, "YOU SHOULD DRINK WATER", Toast.LENGTH_SHORT).show();
-            progress=totalWaterConsumed;
-            addNotification("DRINK WATER");
-            //showNotification(this,"abc","abc");
-        }else{
-            addNotification("You have reached your goal.");
-        }
-        updateProgressBar();
-
-        int leftWater = 2000-progress;
-        TextView TextView2 = findViewById(R.id.textView2);
-        if (leftWater <=0) {
-            TextView2.setText("You have reached your goal!");
-        }
-        else{
-            TextView2.setText("Drink " + leftWater +  " ml more and you are almost there!");
-        }
 
         scanButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -225,7 +201,33 @@ public class MainActivity extends AppCompatActivity {
             intent.setData(Uri.parse("package:" + MainActivity.this.getPackageName()));
             startActivity(intent); // Directly use this here
         }
+        Map<String, Integer> dailyWaterConsumptionMap = myDatabaseHelper.getDailyWaterConsumption();
+        totalWaterConsumed = 0;
+        Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
+        for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
+            String date = entry.getKey();
+            totalWaterConsumed+= entry.getValue();
 
+        }
+        dailyIntake = myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_DAILYINTAKE);
+        if(totalWaterConsumed<dailyIntake){
+            Toast.makeText(this, "YOU SHOULD DRINK WATER", Toast.LENGTH_SHORT).show();
+            progress=totalWaterConsumed;
+            addNotification("DRINK WATER");
+            //showNotification(this,"abc","abc");
+        }else{
+            addNotification("You have reached your goal.");
+        }
+        updateProgressBar();
+
+        int leftWater = dailyIntake-progress;
+        TextView TextView2 = findViewById(R.id.textView2);
+        if (leftWater <=0) {
+            TextView2.setText("You have reached your goal!");
+        }
+        else{
+            TextView2.setText("Drink " + leftWater +  " ml more and you are almost there!");
+        }
 
     }
 
@@ -561,7 +563,7 @@ public class MainActivity extends AppCompatActivity {
     // the progress of ProgressBar in text
     private void updateProgressBar() {
         // Calculate the percentage of progress
-        int percentage = (progress * 100) / 2000;
+        int percentage = (progress * 100) / dailyIntake;
 
         // If progress exceeds the target, set percentage to 100
         if (percentage > 100) {

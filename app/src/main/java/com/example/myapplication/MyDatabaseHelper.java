@@ -339,6 +339,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
 
         }else {
             Toast.makeText(context, "Added Successfully!", Toast.LENGTH_SHORT).show();
+            StepsService.getInstance().stopAndRestartRunnable();
         }
         db.close();
     }
