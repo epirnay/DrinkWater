@@ -88,6 +88,7 @@ public class StepsService extends Service implements SensorEventListener {
             if(firstOpening){
                 currentSteps = 0;
                 firstOpening = false;
+                previousTotalSteps = totalSteps;
             }
 
             // To notify, get difference between records
