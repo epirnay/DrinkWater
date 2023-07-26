@@ -64,6 +64,7 @@ public class StepsService extends Service implements SensorEventListener {
         firstStepTime = Long.parseLong(MainActivity.getFormattedDate());
         remindByTime.run();
         scheduleAlarm();
+
     }
     public void stopAndRestartRunnable() {
         int remindMinute=myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_REMINDMINS);
@@ -83,17 +84,20 @@ public class StepsService extends Service implements SensorEventListener {
     public void onSensorChanged(SensorEvent sensorEvent) {
         if(sensorEvent.sensor.equals(stepSensor)){
             totalSteps = (int) sensorEvent.values[0];
-            // USE previousTotalSteps to send notification ever X steps
+            // USE previousTotalSteps to send notification every X steps
             int currentSteps = (int) (totalSteps - previousTotalSteps);
 
 
             // To notify, get difference between records
             if(currentSteps > myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_REMINDSTEP)){
 
+                // Daily goal reached?
                 if(MainActivity.getTotalWaterConsumed() < myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_DAILYINTAKE)){
                     // Control the water intake between first step and last step
                     lastStepTime = Long.parseLong(MainActivity.getFormattedDate());
                     Long lastRecordedWaterIntake = Long.parseLong(myDatabaseHelper.getLastRecordDateTime());
+
+                    // Did user drink water between while taking steps?
                     if(!(lastRecordedWaterIntake <= lastStepTime && lastRecordedWaterIntake >= firstStepTime)){
                         addNotification("You have taken + " + currentSteps + " step(s), you should drink water.");
                     }

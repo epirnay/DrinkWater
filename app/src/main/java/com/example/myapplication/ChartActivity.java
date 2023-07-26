@@ -19,6 +19,12 @@ import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -29,18 +35,20 @@ public class ChartActivity extends AppCompatActivity {
 
 
     // variable for our bar data set.
-    BarDataSet barDataSet1, barDataSet2;
+    BarDataSet waterIntakeLastWeek, waterIntakeThisWeek;
 
-    BarDataSet barDataSet3, barDataSet4;
+    BarDataSet stepCountLastWeek, stepCountThisWeek;
     Button buttonToSettings;
 
     // array list for storing entries.
     ArrayList barEntries;
 
     // creating a string array for displaying days.
-    String[] days = new String[]{"Sunday", "Monday", "Tuesday", "Thursday", "Friday", "Saturday"};
-    GraphView graphView;
+    String[] days = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+    GraphView graphViewWater;
     GraphView graphViewStep;
+    MyDatabaseHelper myDatabaseHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +57,7 @@ public class ChartActivity extends AppCompatActivity {
         buttonToSettings = (Button) findViewById(R.id.button_ToSetting);
 
         // initializing variable for bar chart.
-        graphView = findViewById(R.id.idGraphView);
+        graphViewWater = findViewById(R.id.idGraphView);
         graphViewStep = findViewById(R.id.idGraphView2);
 
         buttonToSettings.setOnClickListener(new View.OnClickListener() {
@@ -60,11 +68,11 @@ public class ChartActivity extends AppCompatActivity {
             }
         });
 
-        MyDatabaseHelper myDatabaseHelper = MyDatabaseHelper.getInstance(this);
+        myDatabaseHelper = MyDatabaseHelper.getInstance(this);
 
         Map<String, Integer> dailyWaterConsumptionMap = myDatabaseHelper.getDailyWaterConsumption();
 
-        // TODO GET STEP COUNT OF WHAT TIME PERIOD???
+
         Map<String, Integer> stepMap = myDatabaseHelper.getDailyStepCount();
 
         // Create an array of DataPoint to hold the data
@@ -104,25 +112,25 @@ public class ChartActivity extends AppCompatActivity {
         LineGraphSeries<DataPoint> series = new LineGraphSeries<>(dataPoints);
         LineGraphSeries<DataPoint> seriesStep = new LineGraphSeries<>(dataPoints2);
         // Set the title of the graph
-        graphView.setTitle("Daily Water Consumption");
+        graphViewWater.setTitle("Daily Water Consumption");
 
         // Add the LineGraphSeries to the GraphView
-        graphView.addSeries(series);
+        graphViewWater.addSeries(series);
 
         // on below line we are setting
         // text color to our graph view.
-        graphView.setTitleColor(com.google.android.material.R.color.design_default_color_error);
+        graphViewWater.setTitleColor(com.google.android.material.R.color.design_default_color_error);
 
         // on below line we are setting
         // our title text size.
-        graphView.setTitleTextSize(14);
+        graphViewWater.setTitleTextSize(14);
 
         // on below line we are adding
         // data series to our graph view.
-        graphView.addSeries(series);
-        graphView.getViewport().setXAxisBoundsManual(true);
-        graphView.getViewport().setMinX(0);  // starting hour
-        graphView.getViewport().setMaxX(24); // end hour
+        graphViewWater.addSeries(series);
+        graphViewWater.getViewport().setXAxisBoundsManual(true);
+        graphViewWater.getViewport().setMinX(0);  // starting hour
+        graphViewWater.getViewport().setMaxX(24); // end hour
 
 
         graphViewStep.setTitle("Daily Step Count");
@@ -151,13 +159,14 @@ public class ChartActivity extends AppCompatActivity {
         barChart = findViewById(R.id.idBarChart);
 
         // creating a new bar data set.
-        barDataSet1 = new BarDataSet(getBarEntriesOne(), "First Set");
-        barDataSet1.setColor(getApplicationContext().getResources().getColor(com.google.android.material.R.color.cardview_dark_background));
-        barDataSet2 = new BarDataSet(getBarEntriesTwo(), "Second Set");
-        barDataSet2.setColor(Color.BLUE);
+
+        waterIntakeLastWeek = new BarDataSet(getBarEntries(myDatabaseHelper.getLastWeekWaterConsumption()), "Last Week");
+        waterIntakeLastWeek.setColor(getApplicationContext().getResources().getColor(com.google.android.material.R.color.cardview_dark_background));
+        waterIntakeThisWeek = new BarDataSet(getBarEntries(myDatabaseHelper.getWeeklyWaterConsumption()), "This Week");
+        waterIntakeThisWeek.setColor(Color.BLUE);
 
         // below line is to add bar data set to our bar data.
-        BarData data = new BarData(barDataSet1, barDataSet2);
+        BarData data = new BarData(waterIntakeLastWeek, waterIntakeThisWeek);
 
         // after adding data to our bar data we
         // are setting that data to our bar chart.
@@ -230,36 +239,28 @@ public class ChartActivity extends AppCompatActivity {
     }
 
     // array list for first set
-    private ArrayList<BarEntry> getBarEntriesOne() {
+    private ArrayList<BarEntry> getBarEntries(List<WeeklyEntry> weeklyConsumption) {
+        ArrayList<BarEntry> barEntries = new ArrayList<>();
+        // Iterate over weeklyConsumption and convert to BarEntry
+        for (WeeklyEntry entry : weeklyConsumption) {
+            String dayString = entry.getDate();
+            int consumption = entry.getValue();
 
-        // creating a new array list
-        barEntries = new ArrayList<>();
+            // Convert the day string to a float for the x-axis
+            Float dayIndex = Float.valueOf(dayString);
 
-        // adding new entry to our array list with bar
-        // entry and passing x and y axis value to it.
-        barEntries.add(new BarEntry(1f, 4));
-        barEntries.add(new BarEntry(2f, 6));
-        barEntries.add(new BarEntry(3f, 8));
-        barEntries.add(new BarEntry(4f, 2));
-        barEntries.add(new BarEntry(5f, 4));
-        barEntries.add(new BarEntry(6f, 1));
+            barEntries.add(new BarEntry(dayIndex, consumption));
+        }
+
+        // Sort the bar entries by the day index to ensure they're in order
+
+
         return barEntries;
     }
+
+
+
 
     // array list for second set.
-    private ArrayList<BarEntry> getBarEntriesTwo() {
 
-        // creating a new array list
-        barEntries = new ArrayList<>();
-
-        // adding new entry to our array list with bar
-        // entry and passing x and y axis value to it.
-        barEntries.add(new BarEntry(1f, 8));
-        barEntries.add(new BarEntry(2f, 12));
-        barEntries.add(new BarEntry(3f, 4));
-        barEntries.add(new BarEntry(4f, 1));
-        barEntries.add(new BarEntry(5f, 7));
-        barEntries.add(new BarEntry(6f, 3));
-        return barEntries;
-    }
 }

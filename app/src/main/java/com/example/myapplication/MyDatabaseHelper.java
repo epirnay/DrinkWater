@@ -14,8 +14,10 @@ import androidx.annotation.Nullable;
 import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -151,38 +153,18 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         return dailyWaterConsumptionMap;
     }
 
-    public Map<String, Integer> getStepCount() {
-        String now = MainActivity.getFormattedDate();
-        String today = now.substring(0, 8);
-        Map<String, Integer> dailyStepCountMap = new HashMap<>();
-        SQLiteDatabase db = getReadableDatabase();
-        String query = "SELECT substr(time, 1, 2) as time, SUM(step_count) as total_step FROM stepCountDB WHERE date = ? GROUP BY substr(time, 1, 2)";
 
-        Cursor cursor = db.rawQuery(query, new String[]{today});
 
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                @SuppressLint("Range") String time = cursor.getString(cursor.getColumnIndex("time"));
-                @SuppressLint("Range") int totalStepCount = cursor.getInt(cursor.getColumnIndex("total_step"));
-
-                // Add the date and total water consumption to the map.
-                dailyStepCountMap.put(time, totalStepCount);
-            } while (cursor.moveToNext());
-
-            cursor.close();
-        }
-        return dailyStepCountMap;
-    }
-
-    public Map<String, Integer> getWeeklyWaterConsumption() {
+    public List<WeeklyEntry> getWeeklyWaterConsumption() {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         String startDate = MainActivity.getFormattedDate(calendar);
 
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY);
+        calendar.add(Calendar.DATE, 6);
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
         String endDate = MainActivity.getFormattedDate(calendar);
 
-        Map<String, Integer> weeklyWaterConsumptionMap = new HashMap<>();
+        List<WeeklyEntry> weeklyWaterConsumptionMap = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
 
         String query = "SELECT substr(date, 7, 2) as day, SUM(ml) as total_water FROM water_intake WHERE date BETWEEN ? AND ? GROUP BY day";
@@ -194,7 +176,40 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
             do {
                 @SuppressLint("Range") String day = cursor.getString(cursor.getColumnIndex("day"));
                 @SuppressLint("Range") int totalWaterConsumed = cursor.getInt(cursor.getColumnIndex("total_water"));
-                weeklyWaterConsumptionMap.put(day, totalWaterConsumed);
+                weeklyWaterConsumptionMap.add(new WeeklyEntry(day, totalWaterConsumed));
+            } while (cursor.moveToNext());
+
+            cursor.close();
+        }
+        return weeklyWaterConsumptionMap;
+    }
+    public List<WeeklyEntry> getLastWeekWaterConsumption() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.WEEK_OF_YEAR, -1); // Move to the last week
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        String startDate = MainActivity.getFormattedDate(calendar);
+
+        // Set the calendar to the previous Saturday without moving back to the current week.
+        calendar.add(Calendar.WEEK_OF_YEAR, 0); // Move to this week
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        String endDate = MainActivity.getFormattedDate(calendar);
+
+        System.out.println(startDate);
+        System.out.println(endDate);
+
+        List<WeeklyEntry> weeklyWaterConsumptionMap = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+
+        String query = "SELECT substr(date, 7, 2) as day, SUM(ml) as total_water FROM water_intake WHERE date BETWEEN ? AND ? GROUP BY day";
+
+
+        Cursor cursor = db.rawQuery(query, new String[]{startDate, endDate});
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") String day = cursor.getString(cursor.getColumnIndex("day"));
+                @SuppressLint("Range") int totalWaterConsumed = cursor.getInt(cursor.getColumnIndex("total_water"));
+                weeklyWaterConsumptionMap.add(new WeeklyEntry(day, totalWaterConsumed));
             } while (cursor.moveToNext());
 
             cursor.close();
@@ -230,10 +245,11 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
     // Method to get weekly step count for each day of the week
     public Map<String, Integer> getWeeklyStepCount() {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         String startDate = MainActivity.getFormattedDate(calendar);
 
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY);
+        calendar.add(Calendar.DATE, 6);
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
         String endDate = MainActivity.getFormattedDate(calendar);
 
         Map<String, Integer> weeklyStepCountMap = new HashMap<>();
@@ -256,7 +272,37 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         }
         return weeklyStepCountMap;
     }
+    public Map<String, Integer> getLastWeekStepCount() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.WEEK_OF_YEAR, -1); // Move to the last week
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        String startDate = MainActivity.getFormattedDate(calendar);
 
+        // Set the calendar to the previous Saturday without moving back to the current week.
+        calendar.add(Calendar.WEEK_OF_YEAR, 1); // Move to this week
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        String endDate = MainActivity.getFormattedDate(calendar);
+
+        Map<String, Integer> weeklyStepCountMap = new HashMap<>();
+        SQLiteDatabase db = getReadableDatabase();
+
+        String query = "SELECT substr(date, 7, 2) as day, SUM(step_count) as total_steps FROM stepCountDB WHERE date BETWEEN ? AND ? GROUP BY day";
+
+        Cursor cursor = db.rawQuery(query, new String[]{startDate, endDate});
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") String day = cursor.getString(cursor.getColumnIndex("day"));
+                @SuppressLint("Range") int totalSteps = cursor.getInt(cursor.getColumnIndex("total_steps"));
+
+                // Add the day and total step count to the map.
+                weeklyStepCountMap.put(day, totalSteps);
+            } while (cursor.moveToNext());
+
+            cursor.close();
+        }
+        return weeklyStepCountMap;
+    }
     @SuppressLint("Range")
     public int getLastDataFromColumn(String tableName, String columnName) {
         SQLiteDatabase db = this.getReadableDatabase();
