@@ -359,5 +359,29 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
 
         return "0";
     }
+    public long getConsumedWaterBetweenTwoDateTimes(String startDateTime, String endDateTime) {
+        SQLiteDatabase db = this.getReadableDatabase(); // Assuming 'this' is a SQLiteOpenHelper
 
+        String startDate = startDateTime.substring(0, 8);  // Extract date part
+        String startTime = startDateTime.substring(8);     // Extract time part
+
+        String endDate = endDateTime.substring(0, 8);      // Extract date part
+        String endTime = endDateTime.substring(8);         // Extract time part
+
+        // Construct the SQL query
+        String query = "SELECT SUM(ml) FROM WaterTable WHERE (date > ? OR (date = ? AND time >= ?)) AND (date < ? OR (date = ? AND time <= ?))";
+
+        Cursor cursor = db.rawQuery(query, new String[] {startDate, startDate, startTime, endDate, endDate, endTime});
+
+        long totalMl = 0;
+
+        if (!cursor.isNull(0) && cursor.moveToFirst()) {
+            totalMl = cursor.getLong(0); // Get the SUM result
+        }
+
+        cursor.close();
+        db.close();
+
+        return totalMl;
+    }
 }
