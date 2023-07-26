@@ -33,11 +33,12 @@ public class ChartActivity extends AppCompatActivity {
     // variable for our bar chart
     BarChart barChart;
 
-
     // variable for our bar data set.
-    BarDataSet waterIntakeLastWeek, waterIntakeThisWeek;
+    private BarDataSet waterIntakeLastWeek, waterIntakeThisWeek;
 
-    BarDataSet stepCountLastWeek, stepCountThisWeek;
+    private BarChart stepsBarChart;
+
+    private BarDataSet stepCountLastWeek, stepCountThisWeek;
     Button buttonToSettings;
 
     // array list for storing entries.
@@ -236,6 +237,57 @@ public class ChartActivity extends AppCompatActivity {
         // our bar chart.
         barChart.invalidate();
 
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // BAR CHARTS FOR STEPS
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        stepsBarChart = findViewById(R.id.idBarChartStep);
+        stepCountLastWeek = new BarDataSet(getBarEntries(myDatabaseHelper.getLastWeekStepCount()), "Last Week");
+        stepCountLastWeek.setColor(getApplicationContext().getResources().getColor(com.google.android.material.R.color.cardview_dark_background));
+        stepCountThisWeek = new BarDataSet(getBarEntries(myDatabaseHelper.getWeeklyStepCount()), "This Week");
+        stepCountThisWeek.setColor(Color.BLUE);
+        BarData stepsData = new BarData(stepCountLastWeek, stepCountThisWeek);
+        stepsBarChart.setData(stepsData);
+        stepsBarChart.getDescription().setEnabled(false);
+        XAxis stepsXAxis = stepsBarChart.getXAxis();
+        stepsXAxis.setValueFormatter(new IndexAxisValueFormatter(days));
+        stepsXAxis.setCenterAxisLabels(true);
+        stepsXAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        stepsXAxis.setGranularity(1);
+
+        // below line is to enable
+        // granularity to our x axis.
+        stepsXAxis.setGranularityEnabled(true);
+
+        // below line is to make our
+        // bar chart as draggable.
+        stepsBarChart.setDragEnabled(true);
+
+        // below line is to make visible
+        // range for our bar chart.
+        stepsBarChart.setVisibleXRangeMaximum(3);
+
+
+
+        // we are setting width of
+        // bar in below line.
+        stepsData.setBarWidth(0.15f);
+
+        // below line is to set minimum
+        // axis to our chart.
+        stepsBarChart.getXAxis().setAxisMinimum(0);
+
+        // below line is to
+        // animate our chart.
+        stepsBarChart.animate();
+
+        // below line is to group bars
+        // and add spacing to it.
+        stepsBarChart.groupBars(0, groupSpace, barSpace);
+
+        // below line is to invalidate
+        // our bar chart.
+        stepsBarChart.invalidate();
     }
 
     // array list for first set

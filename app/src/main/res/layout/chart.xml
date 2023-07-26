@@ -21,11 +21,11 @@
                 android:layout_height="wrap_content"
                 android:text="Daily Consumption"
                 android:gravity="center_horizontal"/>
+
             <com.jjoe64.graphview.GraphView
                 android:id="@+id/idGraphView"
-                android:layout_width="250dp"
-                android:layout_height="250dp"
-                />
+                android:layout_width="401dp"
+                android:layout_height="302dp" />
 
 
             <TextView
@@ -33,11 +33,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Weekly Consumption" />
+
             <com.github.mikephil.charting.charts.BarChart
                 android:id="@+id/idBarChart"
-                android:layout_width="250dp"
-                android:layout_height="250dp"
-                >
+                android:layout_width="match_parent"
+                android:layout_height="301dp">
 
                 <com.github.mikephil.charting.charts.LineChart
                     android:id="@+id/chart"
@@ -53,15 +53,13 @@
 
             <com.jjoe64.graphview.GraphView
                 android:id="@+id/idGraphView2"
-                android:layout_width="250dp"
-                android:layout_height="250dp"
-                />
+                android:layout_width="match_parent"
+                android:layout_height="323dp" />
 
             <com.github.mikephil.charting.charts.BarChart
                 android:id="@+id/idBarChartStep"
-                android:layout_width="250dp"
-                android:layout_height="250dp"
-                />
+                android:layout_width="match_parent"
+                android:layout_height="276dp" />
 
             <Button
                 android:id="@+id/button_ToSetting"
