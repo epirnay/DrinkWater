@@ -184,7 +184,7 @@ public class StepsService extends Service implements SensorEventListener {
         int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_IMMUTABLE : 0;
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, flags);
 
-        long repeatInterval = 60 * 60 * 1000;
+        long repeatInterval = 30 * 60 * 1000;
         long triggerTime = SystemClock.elapsedRealtime() + repeatInterval;
 
 

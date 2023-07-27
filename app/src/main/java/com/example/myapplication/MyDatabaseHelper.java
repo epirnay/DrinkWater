@@ -363,7 +363,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         String endTime = endDateTime.substring(8);         // Extract time part
 
         // Construct the SQL query
-        String query = "SELECT SUM(ml) FROM WaterTable WHERE (date > ? OR (date = ? AND time >= ?)) AND (date < ? OR (date = ? AND time <= ?))";
+        String query = "SELECT SUM(ml) FROM water_intake WHERE (date > ? OR (date = ? AND time >= ?)) AND (date < ? OR (date = ? AND time <= ?))";
 
         Cursor cursor = db.rawQuery(query, new String[] {startDate, startDate, startTime, endDate, endDate, endTime});
 
