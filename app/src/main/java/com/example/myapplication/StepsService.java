@@ -231,7 +231,7 @@ public class StepsService extends Service implements SensorEventListener {
 // The user-visible description of the channel.
         String description = "abcd";
 
-        int importance = NotificationManager.IMPORTANCE_LOW;
+        int importance = NotificationManager.IMPORTANCE_HIGH;
 
         NotificationChannel mChannel = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {

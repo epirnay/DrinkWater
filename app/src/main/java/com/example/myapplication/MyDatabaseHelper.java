@@ -109,12 +109,6 @@ public class MyDatabaseHelper extends SQLiteOpenHelper{
         cv.put(COLUMN_INTAKE, ml);
 
         long result = db.insert(TABLE_NAME, null, cv);
-        if (result == -1){
-            Toast.makeText(context, "failed", Toast.LENGTH_SHORT).show();
-
-        }else {
-            Toast.makeText(context, "Added Successfully!", Toast.LENGTH_SHORT).show();
-        }
     }
 
     void addStep (String date, String time, int step_count){

@@ -205,12 +205,12 @@ public class MainActivity extends AppCompatActivity {
         totalWaterConsumed = 0;
         Map<String, Integer> treeMap = new TreeMap<String, Integer>(dailyWaterConsumptionMap);
         for (Map.Entry<String, Integer> entry : treeMap.entrySet()) {
-            String date = entry.getKey();
             totalWaterConsumed+= entry.getValue();
 
         }
+        progress = totalWaterConsumed;
         dailyIntake = myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_DAILYINTAKE);
-
+        Log.i("Intake", String.valueOf(totalWaterConsumed));
         updateProgressBar();
 
         int leftWater = dailyIntake-progress;
@@ -369,9 +369,17 @@ public class MainActivity extends AppCompatActivity {
                 int ml = Integer.parseInt(incomingMessage.substring(14));
                 MyDatabaseHelper myDB = MyDatabaseHelper.getInstance(MainActivity.this);
                 myDB.addIntake(date, time, ml);
-                progress=progress+ml;
-                updateProgressBar();
-                StepsService.getInstance().stopAndRestartRunnable();
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        progress=progress+ml;
+                        updateProgressBar();
+                        StepsService.getInstance().stopAndRestartRunnable();
+
+                    }
+                });
+
+
             }
 
         }
@@ -433,99 +441,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void addNotification(String message) {
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-// The id of the channel.
-        String id = "my_channel_01";
-
-// The user-visible name of the channel.
-        CharSequence name = "abc";
-
-// The user-visible description of the channel.
-        String description = "abc";
-
-        int importance = NotificationManager.IMPORTANCE_LOW;
-
-        NotificationChannel mChannel = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            mChannel = new NotificationChannel(id, name,importance);
-            mChannel.setDescription(description);
-
-            mChannel.enableLights(true);
-// Sets the notification light color for notifications posted to this
-// channel, if the device supports this feature.
-            mChannel.setLightColor(Color.RED);
-
-            mChannel.enableVibration(true);
-            mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-
-            mNotificationManager.createNotificationChannel(mChannel);
-        }
-
-// Configure the notification channel.
-
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.circle) //set icon for notification
-                        .setContentTitle("DrinkWater") //set title of notification
-                        .setContentText(message)//this is notification message
-                        .setAutoCancel(true) // makes auto cancel of notification
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT).setChannelId(id); //set priority of notification
 
 
-        Intent notificationIntent = new Intent(this, NotificationView.class);
-        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        //notification message will get at NotificationView
-        notificationIntent.putExtra("message", "This is a notification message");
-        PendingIntent notifyPendingIntent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            notifyPendingIntent = PendingIntent.getBroadcast(
-                    getApplication(),
-                    0,
-                    notificationIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE
-            );
-        } else {
-            notifyPendingIntent = PendingIntent.getBroadcast(
-                    getApplication(),
-                    0,
-                    notificationIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-            );
-        }
-        PendingIntent pendingIntent = notifyPendingIntent;
-        builder.setContentIntent(pendingIntent);
-
-        // Add as notification
-        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.notify(0, builder.build());
-    }
-    public void showNotification(Context context, String title, String message) {
-        Intent notifyIntent = new Intent(context, NotificationView.class);
-        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivities(context, 0,
-                new Intent[]{notifyIntent}, PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_MUTABLE);
-        Notification notification = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            notification = new Notification.Builder(context)
-                    .setSmallIcon(android.R.drawable.ic_dialog_info)
-                    .setContentTitle(title)
-                    .setContentText(message)
-                    .setAutoCancel(true)
-                    .setContentIntent(pendingIntent)
-                    .setChannelId("asdasd")
-                    .build();
-        }
-        notification.defaults |= Notification.DEFAULT_SOUND;
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, notification);
-    }
-    public void notificationLast(){
-
-
-    }
     private void requestBluetoothPermissions() {
         runOnUiThread(new Runnable() {
             @Override
@@ -557,6 +474,7 @@ public class MainActivity extends AppCompatActivity {
     private void updateProgressBar() {
         // Calculate the percentage of progress
         int percentage = (progress * 100) / dailyIntake;
+        Log.i("Progress", "updateProgressBar: " + percentage);
 
         // If progress exceeds the target, set percentage to 100
         if (percentage > 100) {
