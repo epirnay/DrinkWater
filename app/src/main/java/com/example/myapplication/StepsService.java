@@ -45,9 +45,9 @@ public class StepsService extends Service implements SensorEventListener {
     private final Runnable remindByTime = new Runnable() {
         @Override
         public void run() {
-
+            // get the "remind every minute" field from settings table
             int remindTime = myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_REMINDMINS);
-
+            // if goal is not reached send notification
             if(MainActivity.getTotalWaterConsumed() < myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_DAILYINTAKE)){
                 addNotification(remindTime + " minute(s) has passed, you should drink water.");
             }
@@ -56,15 +56,19 @@ public class StepsService extends Service implements SensorEventListener {
     };
     @Override
     public void onCreate(){
+        // get step sensor
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         instance = this;
         myDatabaseHelper = MyDatabaseHelper.getInstance(this);
         firstStepTime = MainActivity.getFormattedDate();
+        // for time notification
         remindByTime.run();
+        // this alarm for saving steps
         scheduleAlarm();
 
     }
+    // to stop current notification timer and restart
     public void stopAndRestartRunnable() {
         int remindMinute=myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_REMINDMINS);
         handler.removeCallbacks(remindByTime);
@@ -79,17 +83,20 @@ public class StepsService extends Service implements SensorEventListener {
         return null;
     }
 
+    // whenever the user start walking this function triggered
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         if(sensorEvent.sensor.equals(stepSensor)){
             totalSteps = (int) sensorEvent.values[0];
             // USE previousTotalSteps to send notification every X steps
             int currentSteps = (int) (totalSteps - previousTotalSteps);
+            // reset the sensor on the first launch
             if(firstOpening){
                 currentSteps = 0;
                 firstOpening = false;
                 previousTotalSteps = totalSteps;
             }
+            // get setting
             int remindSteps = myDatabaseHelper.getLastDataFromColumn(MyDatabaseHelper.TABLE_NAME3, MyDatabaseHelper.COLUMN_REMINDSTEP);
             // To notify, get difference between records
             if(currentSteps > remindSteps){
@@ -113,6 +120,7 @@ public class StepsService extends Service implements SensorEventListener {
                 // save
                 previousTotalSteps = totalSteps;
             }
+            // showing user
             updateNotification(currentSteps);
 
         }
@@ -146,7 +154,7 @@ public class StepsService extends Service implements SensorEventListener {
 
         Intent notificationIntent = new Intent(this, MainActivity.class); // Assuming you want to go to MainActivity when clicking the notification
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
-
+        // start notification
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Step Counter")
                 .setContentText("0")
@@ -161,6 +169,7 @@ public class StepsService extends Service implements SensorEventListener {
 
         return START_STICKY;
     }
+    // to change step counter value on the screen
     private void updateNotification(int currentSteps) {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
@@ -175,6 +184,8 @@ public class StepsService extends Service implements SensorEventListener {
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         manager.notify(NOTIF_ID, notification);
     }
+
+    // to save steps schedule alarm for every 30 minutes. the alarm is going to be received in ALarmReceiver
     public void scheduleAlarm() {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Log.i("ALERT", "ALERT HAS BEEN SET");
@@ -185,6 +196,7 @@ public class StepsService extends Service implements SensorEventListener {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, flags);
 
         long repeatInterval = 30 * 60 * 1000;
+        // used elapsedtime to make independent from local time
         long triggerTime = SystemClock.elapsedRealtime() + repeatInterval;
 
 
@@ -218,7 +230,9 @@ public class StepsService extends Service implements SensorEventListener {
     public void setFirstSave(boolean firstSave) {
         this.firstSave = firstSave;
     }
+
     // TODO fix redundancy
+    // to send notification
     private void addNotification(String message) {
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 

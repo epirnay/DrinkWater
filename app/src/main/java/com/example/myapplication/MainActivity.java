@@ -147,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
         //myDB.addStep("20230718161024",5);
         //myDatabaseHelper.addStep("1",5);
 
-        // TODO make dynamic
 
 
         scanButton.setOnClickListener(new View.OnClickListener() {
@@ -314,6 +313,7 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
+
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String deviceAddress = gatt.getDevice().getAddress();
@@ -347,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
                 gatt.close();
             }
         }
-
+        // whenever the device sends notification it is received here
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             UUID uuid = characteristic.getUuid();
@@ -363,6 +363,7 @@ public class MainActivity extends AppCompatActivity {
                 characteristic.setValue(value);
                 gatt.writeCharacteristic(characteristic);
             }
+            // parse and save to the database
             else{
                 String date = incomingMessage.substring(0,8);
                 String time = incomingMessage.substring(8,14);

@@ -41,7 +41,7 @@ public class SettingActivity extends AppCompatActivity {
         editText2.setFilters(new InputFilter[] { new InputFilter.LengthFilter(5) }); // Optional: Set maximum character length
         editText2.setInputType(InputType.TYPE_CLASS_NUMBER);
 
-
+        // To change ml/step while the user writes
         TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -96,12 +96,12 @@ public class SettingActivity extends AppCompatActivity {
     private void updateMlPerStep() {
         String dailyWater = editText.getText().toString();
         String dailyStep = editText2.getText().toString();
-
+        // Update ml/step if both field are not null
         if (!dailyWater.isEmpty() && !dailyStep.isEmpty()) {
             try {
                 int dailyWaterInt = Integer.parseInt(dailyWater);
                 int dailyStepInt = Integer.parseInt(dailyStep);
-
+                // Divide to 0 exception
                 if (dailyStepInt != 0) {
                     double mlPerStepValue = (double) dailyWaterInt / dailyStepInt;
                     mlPerStep.setText("Goal " + mlPerStepValue + " ml for each step" );

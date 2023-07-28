@@ -9,15 +9,17 @@ import android.os.Build;
 import android.util.Log;
 
 public class AlarmReceiver extends BroadcastReceiver {
+
+    // received alarm falls here
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.i("ALERT", "Alarm received.");
+        // get date
         MyDatabaseHelper mdh = MyDatabaseHelper.getInstance(context.getApplicationContext());
         StepsService ss = StepsService.getInstance();
         String now = MainActivity.getFormattedDate();
         String date = now.substring(0, 8);
         String time = now.substring(8);
-
         // Reset on the first save
         if (ss.isFirstSave()){
             ss.setFirstSave(false);
